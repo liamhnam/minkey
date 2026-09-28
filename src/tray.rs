@@ -173,6 +173,10 @@ impl TrayService {
         self.thread_handle = Some(handle);
     }
 
+    pub fn get_hwnd(&self) -> usize {
+        self.hwnd
+    }
+
     pub fn update_icon(&self) {
         unsafe {
             if !GLOBAL_TRAY.is_null() {

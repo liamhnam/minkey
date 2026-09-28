@@ -57,10 +57,13 @@ fn sync_engine_from_config(engine: &mut VietnameseEngine, config: &AppConfig) {
 }
 
 fn main() {
-    // Single instance mutex guard matching OpenKey behavior
+    // Single instance guard — matching OpenKey behavior
     let mutex_name = wide_null("Local\\MinkeyAppMutex");
+    unsafe { windows_sys::Win32::Foundation::SetLastError(0) };
     let _mutex = unsafe { CreateMutexW(std::ptr::null(), 1, mutex_name.as_ptr()) };
-    if unsafe { GetLastError() } == ERROR_ALREADY_EXISTS {
+    let last_err = unsafe { GetLastError() };
+    if last_err == ERROR_ALREADY_EXISTS {
+        // Another instance is running — show its window and exit
         unsafe {
             let tray_wnd = FindWindowW(wide_null("MinkeyTrayWndClass").as_ptr(), std::ptr::null());
             if !tray_wnd.is_null() {
@@ -71,10 +74,10 @@ fn main() {
         return;
     }
 
-    // Load persistent user configuration from Registry
+    // Load application configuration from registry
     let app_config = Arc::new(AppConfig::load_from_registry());
 
-    // Create Vietnamese Engine singleton
+    // Create Vietnamese Engine singleton and sync settings
     let engine = Arc::new(Mutex::new(VietnameseEngine::new()));
     if let Ok(mut eng) = engine.lock() {
         sync_engine_from_config(&mut eng, &app_config);
@@ -100,19 +103,28 @@ fn main() {
 
     let hook_config = app_config.to_hook_config();
 
-    // Create Slint Windows
-    let main_window = MainWindow::new().expect("Failed to initialize Slint UI");
+    // Create Slint UI windows — catch_unwind guards against renderer failures
+    let main_window = match std::panic::catch_unwind(MainWindow::new) {
+        Ok(Ok(w)) => w,
+        Ok(Err(_)) | Err(_) => return,
+    };
     populate_ui_from_config(&main_window, &app_config);
 
-    let macro_window = MacroWindow::new().expect("Failed to initialize Slint MacroWindow");
+    let macro_window = match MacroWindow::new() {
+        Ok(w) => w,
+        Err(_) => return,
+    };
     macro_window.set_opt_auto_caps(app_config.auto_caps_macro.load(Ordering::Relaxed));
     setup_macro_window_callbacks(&macro_window, engine.clone(), app_config.clone());
 
-    let convert_window = ConvertWindow::new().expect("Failed to initialize Slint ConvertWindow");
+    let convert_window = match ConvertWindow::new() {
+        Ok(w) => w,
+        Err(_) => return,
+    };
     populate_convert_ui_from_config(&convert_window, &app_config);
     setup_convert_window_callbacks(&convert_window, app_config.clone());
 
-    // Callbacks for System Tray
+    // Build System Tray callbacks
     let ui_weak_for_tray = main_window.as_weak();
     let macro_win_weak_for_tray = macro_window.as_weak();
     let convert_win_weak_for_tray = convert_window.as_weak();
@@ -189,17 +201,16 @@ fn main() {
         }),
     };
 
-    // Initialize System Tray
+    // Initialize and start System Tray service
     let mut tray_service = TrayService::new(
         hook_config.clone(),
         engine.clone(),
         tray_callbacks,
     );
     tray_service.start(app_config.use_gray_icon.clone());
+    let tray_hwnd = tray_service.get_hwnd();
 
-    let tray_hwnd = unsafe { FindWindowW(wide_null("MinkeyTrayWndClass").as_ptr(), std::ptr::null()) } as usize;
-
-    // Setup Slint UI Callbacks
+    // Setup Slint UI callbacks (settings panels, language/table pickers, etc.)
     setup_ui_callbacks(
         &main_window,
         app_config.clone(),
@@ -213,13 +224,13 @@ fn main() {
     // Initialize Low-Level Keyboard and Mouse Hook
     let mut hook_service = WindowsHookService::new(hook_config, engine.clone(), smart_switch.clone());
     let ui_weak_for_hook = main_window.as_weak();
-
     let config_for_convert_hotkey = app_config.clone();
     let ui_weak_table = main_window.as_weak();
     let app_cfg_table = app_config.clone();
+
     hook_service.start(
         move |lang| {
-            // Callback when language toggled via hotkey (e.g. Alt+Z or Ctrl+Shift)
+            // Language toggled via hotkey (Alt+Z or Ctrl+Shift)
             if tray_hwnd != 0 {
                 unsafe {
                     PostMessageW(tray_hwnd as HWND, WM_USER + 2026, 0, 0);
@@ -233,7 +244,7 @@ fn main() {
             });
         },
         move |code_table| {
-            // Callback when code table changed via smart switch
+            // Code table changed via smart switch
             app_cfg_table.code_table.store(code_table, Ordering::Relaxed);
             let ui_weak = ui_weak_table.clone();
             let _ = slint::invoke_from_event_loop(move || {
@@ -243,7 +254,7 @@ fn main() {
             });
         },
         move || {
-            // Callback on quick convert hotkey
+            // Quick convert clipboard hotkey
             let opts = minkey::ui::get_convert_options_from_config(&config_for_convert_hotkey);
             let ok = minkey::convert::quick_convert_clipboard(&opts);
             if ok {
@@ -265,18 +276,18 @@ fn main() {
         },
     );
 
-    // Beep on successful startup
+    // Beep to signal successful startup
     unsafe { minkey::hook::MessageBeep(0) };
 
-    // Show on startup if enabled by user
+    // Show control panel on startup if configured
     if app_config.show_on_startup.load(Ordering::Relaxed) {
         let _ = main_window.show();
     }
 
-    // Run Slint Event Loop
-    let _ = slint::run_event_loop();
+    // Run Slint event loop — blocks until quit_event_loop() is called (Exit menu)
+    let _ = slint::run_event_loop_until_quit();
 
-    // Clean shutdown
+    // Clean shutdown: unhook, stop tray, persist config
     hook_service.stop();
     tray_service.stop();
     app_config.save_to_registry();

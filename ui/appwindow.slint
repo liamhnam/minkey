@@ -1,0 +1,1055 @@
+import { Button, CheckBox, ComboBox, TabWidget, LineEdit, Switch, ScrollView } from "std-widgets.slint";
+
+export component MainWindow inherits Window {
+    title: "Minkey - Bảng Điều Khiển";
+    preferred-width: 520px;
+    preferred-height: 600px;
+    min-width: 500px;
+    min-height: 580px;
+    background: #f8fafc;
+    default-font-family: "Segoe UI, Inter, sans-serif";
+
+
+    // Public properties synced with backend
+    in-out property <int> active-tab: 0;
+    in-out property <int> selected-input-type: 0;
+    in-out property <int> selected-code-table: 0;
+    in-out property <bool> is-vietnamese: true;
+
+    // Hotkey modifiers
+    in-out property <bool> switch-ctrl: false;
+    in-out property <bool> switch-alt: true;
+    in-out property <bool> switch-win: false;
+    in-out property <bool> switch-shift: false;
+    in-out property <string> switch-key: "Z";
+    in-out property <bool> switch-beep: true;
+
+    // Tab 1: Typing Engine settings
+    in-out property <bool> opt-modern-orthography: false;
+    in-out property <bool> opt-fix-browser: true;
+    in-out property <bool> opt-check-spelling: true;
+    in-out property <bool> opt-restore-spelling: true;
+    in-out property <bool> opt-allow-zfwj: false;
+    in-out property <bool> opt-temp-off-spelling: false;
+    in-out property <bool> opt-smart-switch: true;
+    in-out property <bool> opt-upper-first: false;
+    in-out property <bool> opt-remember-code: true;
+    in-out property <bool> opt-other-language: true;
+    in-out property <bool> opt-temp-off-openkey: false;
+
+    // Tab 2: Macro settings
+    in-out property <bool> opt-quick-telex: false;
+    in-out property <bool> opt-use-macro: true;
+    in-out property <bool> opt-macro-in-english: false;
+    in-out property <bool> opt-macro-auto-caps: false;
+    in-out property <bool> opt-quick-start-consonant: false;
+    in-out property <bool> opt-quick-end-consonant: false;
+
+    // Tab 3: System settings
+    in-out property <bool> opt-modern-icon: false;
+    in-out property <bool> opt-show-on-startup: false;
+    in-out property <bool> opt-run-with-windows: true;
+    in-out property <bool> opt-run-as-admin: false;
+    in-out property <bool> opt-check-update: false;
+    in-out property <bool> opt-desktop-shortcut: false;
+    in-out property <bool> opt-fix-chromium: false;
+    in-out property <bool> opt-use-clipboard: false;
+    in-out property <bool> opt-support-metro: false;
+
+    // Callbacks to Rust
+    callback input-type-changed(int);
+    callback code-table-changed(int);
+    callback language-changed(bool);
+    callback switch-hotkey-changed();
+    callback setting-toggled(string, bool);
+    callback open-macro-table();
+    callback open-convert-tool();
+    callback reset-defaults();
+    callback check-update-clicked();
+    callback open-github();
+    callback close-window();
+    callback exit-app();
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+
+        // Header: Title and Language Quick Toggle
+        Rectangle {
+            height: 60px;
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            HorizontalLayout {
+                padding-left: 16px;
+                padding-right: 16px;
+                alignment: space-between;
+
+                VerticalLayout {
+                    alignment: center;
+                    spacing: 2px;
+                    Text {
+                        text: "Minkey";
+                        font-size: 18px;
+                        font-weight: 700;
+                        color: #0f172a;
+                    }
+                    Text {
+                        text: "Bộ gõ Tiếng Việt nguồn mở siêu nhẹ";
+                        font-size: 11px;
+                        color: #64748b;
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: center;
+                    spacing: 8px;
+
+                    Rectangle {
+                        width: 70px;
+                        height: 32px;
+                        border-radius: 6px;
+                        background: root.is-vietnamese ? #2563eb : #e2e8f0;
+                        animate background { duration: 150ms; }
+
+                        Text {
+                            text: "V (Việt)";
+                            color: root.is-vietnamese ? #ffffff : #475569;
+                            font-size: 12px;
+                            font-weight: 600;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+
+                        TouchArea {
+                            clicked => {
+                                root.is-vietnamese = true;
+                                root.language-changed(true);
+                            }
+                        }
+                    }
+
+                    Rectangle {
+                        width: 70px;
+                        height: 32px;
+                        border-radius: 6px;
+                        background: !root.is-vietnamese ? #2563eb : #e2e8f0;
+                        animate background { duration: 150ms; }
+
+                        Text {
+                            text: "E (Anh)";
+                            color: !root.is-vietnamese ? #ffffff : #475569;
+                            font-size: 12px;
+                            font-weight: 600;
+                            horizontal-alignment: center;
+                            vertical-alignment: center;
+                        }
+
+                        TouchArea {
+                            clicked => {
+                                root.is-vietnamese = false;
+                                root.language-changed(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Section: Main Controls (Input Method, Code Table, Switch Key)
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 12px;
+                spacing: 10px;
+
+
+                HorizontalLayout {
+                    spacing: 12px;
+
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        Text {
+                            text: "Kiểu gõ:";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #334155;
+                        }
+                        ComboBox {
+                            model: ["Telex", "VNI", "Simple Telex 1", "Simple Telex 2"];
+                            current-index <=> root.selected-input-type;
+                            selected(val) => {
+                                root.input-type-changed(root.selected-input-type);
+                            }
+                        }
+                    }
+
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        Text {
+                            text: "Bảng mã:";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #334155;
+                        }
+                        ComboBox {
+                            model: ["Unicode", "TCVN3 (ABC)", "VNI Windows", "Unicode Tổ hợp", "Vietnamese Locale CP 1258"];
+                            current-index <=> root.selected-code-table;
+                            selected(val) => {
+                                root.code-table-changed(root.selected-code-table);
+                            }
+                        }
+                    }
+                }
+
+                // Switch Hotkey Config Row
+                VerticalLayout {
+                    spacing: 4px;
+                    Text {
+                        text: "Phím chuyển đổi Anh/Việt:";
+                        font-size: 12px;
+                        font-weight: 600;
+                        color: #334155;
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+                        alignment: start;
+
+                        CheckBox {
+                            text: "Ctrl";
+                            checked <=> root.switch-ctrl;
+                            toggled => { root.switch-hotkey-changed(); }
+                        }
+                        CheckBox {
+                            text: "Alt";
+                            checked <=> root.switch-alt;
+                            toggled => { root.switch-hotkey-changed(); }
+                        }
+                        CheckBox {
+                            text: "Win";
+                            checked <=> root.switch-win;
+                            toggled => { root.switch-hotkey-changed(); }
+                        }
+                        CheckBox {
+                            text: "Shift";
+                            checked <=> root.switch-shift;
+                            toggled => { root.switch-hotkey-changed(); }
+                        }
+
+                        Text {
+                            text: "+";
+                            vertical-alignment: center;
+                            font-size: 13px;
+                            font-weight: 700;
+                            color: #64748b;
+                        }
+
+                        LineEdit {
+                            text <=> root.switch-key;
+                            width: 40px;
+                            horizontal-alignment: center;
+                            edited => { root.switch-hotkey-changed(); }
+                        }
+
+                        CheckBox {
+                            text: "Âm báo";
+                            checked <=> root.switch-beep;
+                            toggled => { root.switch-hotkey-changed(); }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Section: Tabbed Configuration Options
+        Rectangle {
+            vertical-stretch: 1;
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            TabWidget {
+
+                Tab {
+                    title: "Bộ gõ";
+
+                    ScrollView {
+                        VerticalLayout {
+                            padding: 10px;
+                            spacing: 8px;
+
+                            CheckBox {
+                                text: "Đặt dấu kiểu mới (oà, uý thay vì òa, úy)";
+                                checked <=> root.opt-modern-orthography;
+                                toggled => { root.setting-toggled("modern_orthography", root.opt-modern-orthography); }
+                            }
+                            CheckBox {
+                                text: "Sửa lỗi gợi ý trên trình duyệt (Chrome, Edge, Firefox, Excel)";
+                                checked <=> root.opt-fix-browser;
+                                toggled => { root.setting-toggled("fix_browser", root.opt-fix-browser); }
+                            }
+                            CheckBox {
+                                text: "Kiểm tra chính tả";
+                                checked <=> root.opt-check-spelling;
+                                toggled => { root.setting-toggled("check_spelling", root.opt-check-spelling); }
+                            }
+                            CheckBox {
+                                text: "Tự động khôi phục từ sai chính tả khi gõ phím trắng";
+                                checked <=> root.opt-restore-spelling;
+                                enabled: root.opt-check-spelling;
+                                toggled => { root.setting-toggled("restore_spelling", root.opt-restore-spelling); }
+                            }
+                            CheckBox {
+                                text: "Cho phép phụ âm Z, W, J, F đứng đầu từ";
+                                checked <=> root.opt-allow-zfwj;
+                                enabled: root.opt-check-spelling;
+                                toggled => { root.setting-toggled("allow_zfwj", root.opt-allow-zfwj); }
+                            }
+                            CheckBox {
+                                text: "Tạm tắt kiểm tra chính tả bằng cách nhấn đúp phím Ctrl";
+                                checked <=> root.opt-temp-off-spelling;
+                                enabled: root.opt-check-spelling;
+                                toggled => { root.setting-toggled("temp_off_spelling", root.opt-temp-off-spelling); }
+                            }
+                            CheckBox {
+                                text: "Tự động chuyển chế độ Anh/Việt theo từng ứng dụng (Smart Switch)";
+                                checked <=> root.opt-smart-switch;
+                                toggled => { root.setting-toggled("smart_switch", root.opt-smart-switch); }
+                            }
+                            CheckBox {
+                                text: "Tự động viết hoa chữ cái đầu câu";
+                                checked <=> root.opt-upper-first;
+                                toggled => { root.setting-toggled("upper_first", root.opt-upper-first); }
+                            }
+                            CheckBox {
+                                text: "Tự động ghi nhớ bảng mã cho từng ứng dụng";
+                                checked <=> root.opt-remember-code;
+                                toggled => { root.setting-toggled("remember_code", root.opt-remember-code); }
+                            }
+                            CheckBox {
+                                text: "Hỗ trợ gõ song song ngôn ngữ khác";
+                                checked <=> root.opt-other-language;
+                                toggled => { root.setting-toggled("other_language", root.opt-other-language); }
+                            }
+                            CheckBox {
+                                text: "Tạm tắt bộ gõ bằng phím Alt";
+                                checked <=> root.opt-temp-off-openkey;
+                                toggled => { root.setting-toggled("temp_off_openkey", root.opt-temp-off-openkey); }
+                            }
+                        }
+                    }
+                }
+
+                Tab {
+                    title: "Gõ tắt";
+
+                    ScrollView {
+                        VerticalLayout {
+                            padding: 10px;
+                            spacing: 8px;
+
+                            CheckBox {
+                                text: "Gõ nhanh Telex (cc->ch, gg->gi, kk->kh, nn->ng, qq->qu, pp->ph, tt->th)";
+                                checked <=> root.opt-quick-telex;
+                                toggled => { root.setting-toggled("quick_telex", root.opt-quick-telex); }
+                            }
+                            CheckBox {
+                                text: "Bật tính năng gõ tắt (Macro)";
+                                checked <=> root.opt-use-macro;
+                                toggled => { root.setting-toggled("use_macro", root.opt-use-macro); }
+                            }
+                            CheckBox {
+                                text: "Cho phép gõ tắt cả khi đang ở chế độ tiếng Anh";
+                                checked <=> root.opt-macro-in-english;
+                                enabled: root.opt-use-macro;
+                                toggled => { root.setting-toggled("macro_in_english", root.opt-macro-in-english); }
+                            }
+                            CheckBox {
+                                text: "Tự động đổi hoa / thường theo từ viết tắt";
+                                checked <=> root.opt-macro-auto-caps;
+                                enabled: root.opt-use-macro;
+                                toggled => { root.setting-toggled("macro_auto_caps", root.opt-macro-auto-caps); }
+                            }
+                            CheckBox {
+                                text: "Phụ âm đầu thông minh (f->ph, j->gi, w->qu)";
+                                checked <=> root.opt-quick-start-consonant;
+                                toggled => { root.setting-toggled("quick_start_consonant", root.opt-quick-start-consonant); }
+                            }
+                            CheckBox {
+                                text: "Phụ âm cuối thông minh (g->ng, h->nh, k->ch)";
+                                checked <=> root.opt-quick-end-consonant;
+                                toggled => { root.setting-toggled("quick_end_consonant", root.opt-quick-end-consonant); }
+                            }
+
+                            HorizontalLayout {
+                                alignment: start;
+                                padding-top: 10px;
+                                Button {
+                                    text: "Bảng gõ tắt...";
+                                    clicked => { root.open-macro-table(); }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Tab {
+                    title: "Hệ thống";
+
+                    ScrollView {
+                        VerticalLayout {
+                            padding: 10px;
+                            spacing: 8px;
+
+                            CheckBox {
+                                text: "Bật bảng điều khiển khi khởi động ứng dụng";
+                                checked <=> root.opt-show-on-startup;
+                                toggled => { root.setting-toggled("show_on_startup", root.opt-show-on-startup); }
+                            }
+                            CheckBox {
+                                text: "Dùng biểu tượng màu xám hiện đại trên thanh taskbar";
+                                checked <=> root.opt-modern-icon;
+                                toggled => { root.setting-toggled("modern_icon", root.opt-modern-icon); }
+                            }
+                            CheckBox {
+                                text: "Khởi động cùng hệ điều hành Windows";
+                                checked <=> root.opt-run-with-windows;
+                                toggled => { root.setting-toggled("run_with_windows", root.opt-run-with-windows); }
+                            }
+                            CheckBox {
+                                text: "Chạy với quyền quản trị viên (Run as Administrator)";
+                                checked <=> root.opt-run-as-admin;
+                                toggled => { root.setting-toggled("run_as_admin", root.opt-run-as-admin); }
+                            }
+                            CheckBox {
+                                text: "Tự động kiểm tra phiên bản mới";
+                                checked <=> root.opt-check-update;
+                                toggled => { root.setting-toggled("check_update", root.opt-check-update); }
+                            }
+                            CheckBox {
+                                text: "Tạo biểu tượng tắt ngoài Desktop";
+                                checked <=> root.opt-desktop-shortcut;
+                                toggled => { root.setting-toggled("desktop_shortcut", root.opt-desktop-shortcut); }
+                            }
+                            CheckBox {
+                                text: "Bản vá đặc biệt cho trình duyệt nền Chromium";
+                                checked <=> root.opt-fix-chromium;
+                                enabled: root.opt-fix-browser;
+                                toggled => { root.setting-toggled("fix_chromium", root.opt-fix-chromium); }
+                            }
+                            CheckBox {
+                                text: "Sử dụng Clipboard để gửi phím (thay vì SendInput)";
+                                checked <=> root.opt-use-clipboard;
+                                toggled => { root.setting-toggled("use_clipboard", root.opt-use-clipboard); }
+                            }
+                            CheckBox {
+                                text: "Hỗ trợ ứng dụng Metro / UWP Windows Store";
+                                checked <=> root.opt-support-metro;
+                                toggled => { root.setting-toggled("support_metro", root.opt-support-metro); }
+                            }
+                        }
+                    }
+                }
+
+                Tab {
+                    title: "Thông tin";
+
+                    VerticalLayout {
+                        padding: 16px;
+                        spacing: 12px;
+                        alignment: center;
+
+                        Text {
+                            text: "Minkey - Vietnamese Input Method";
+                            font-size: 16px;
+                            font-weight: 700;
+                            color: #1e293b;
+                            horizontal-alignment: center;
+                        }
+
+                        Text {
+                            text: "Bản làm lại hoàn toàn bằng Rust của bộ gõ OpenKey danh tiếng.\nGiữ nguyên 100% tính năng, tốc độ tối đa, tiêu thụ RAM cực thấp.";
+                            font-size: 12px;
+                            color: #64748b;
+                            horizontal-alignment: center;
+                        }
+
+                        Text {
+                            text: "Tác giả gốc OpenKey: Mai Vũ Tuyên (maivutuyen.91@gmail.com)\nRust Port & Modern UI: Liam & Antigravity\nGiấy phép: GNU General Public License v3.0 (GPLv3)";
+                            font-size: 11px;
+                            color: #94a3b8;
+                            horizontal-alignment: center;
+                        }
+
+                        HorizontalLayout {
+                            spacing: 12px;
+                            alignment: center;
+                            padding-top: 10px;
+
+                            Button {
+                                text: "Mã nguồn GitHub";
+                                clicked => { root.open-github(); }
+                            }
+
+                            Button {
+                                text: "Kiểm tra cập nhật";
+                                clicked => { root.check-update-clicked(); }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Footer Actions: Reset Default, Close (to Tray), Exit
+        HorizontalLayout {
+            spacing: 10px;
+            alignment: space-between;
+
+            Button {
+                text: "Cài đặt gốc";
+                clicked => { root.reset-defaults(); }
+            }
+
+            HorizontalLayout {
+                spacing: 8px;
+
+                Button {
+                    text: "Đóng (Ẩn khay)";
+                    primary: true;
+                    clicked => { root.close-window(); }
+                }
+
+                Button {
+                    text: "Kết thúc";
+                    clicked => { root.exit-app(); }
+                }
+            }
+        }
+    }
+}
+
+export struct MacroItem {
+    text: string,
+    content: string,
+}
+
+export component MacroWindow inherits Window {
+    title: "Minkey - Bảng Gõ Tắt";
+    preferred-width: 580px;
+    preferred-height: 540px;
+    min-width: 520px;
+    min-height: 480px;
+    background: #f8fafc;
+    default-font-family: "Segoe UI, Inter, sans-serif";
+
+    in-out property <[MacroItem]> items: [];
+    in-out property <string> input-text: "";
+    in-out property <string> input-content: "";
+    in-out property <string> search-filter: "";
+    in-out property <bool> opt-auto-caps: false;
+    in-out property <bool> is-editing: false;
+
+    callback add-or-update-macro(string, string);
+    callback delete-macro(string);
+    callback import-clicked();
+    callback export-clicked();
+    callback autocaps-toggled(bool);
+    callback input-text-changed(string);
+    callback search-filter-changed(string);
+    callback close-window();
+
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+
+        // Header and Search bar
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 12px;
+                spacing: 8px;
+
+                HorizontalLayout {
+                    alignment: space-between;
+                    Text {
+                        text: "Danh sách từ gõ tắt";
+                        font-size: 15px;
+                        font-weight: 700;
+                        color: #1e293b;
+                    }
+                    Text {
+                        text: "Tổng số: " + root.items.length;
+                        font-size: 12px;
+                        color: #64748b;
+                        vertical-alignment: center;
+                    }
+                }
+
+                LineEdit {
+                    placeholder-text: "Tìm kiếm từ gõ tắt...";
+                    text <=> root.search-filter;
+                    edited => { root.search-filter-changed(root.search-filter); }
+                }
+            }
+        }
+
+        // List Area
+        Rectangle {
+            vertical-stretch: 1;
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 8px;
+                spacing: 4px;
+
+                // Table Header
+                Rectangle {
+                    height: 30px;
+                    background: #f1f5f9;
+                    border-radius: 6px;
+
+                    HorizontalLayout {
+                        padding-left: 12px;
+                        padding-right: 12px;
+                        spacing: 8px;
+
+                        Text {
+                            width: 130px;
+                            text: "Từ gõ tắt";
+                            font-weight: 700;
+                            font-size: 12px;
+                            color: #475569;
+                            vertical-alignment: center;
+                        }
+                        Text {
+                            horizontal-stretch: 1;
+                            text: "Nội dung thay thế";
+                            font-weight: 700;
+                            font-size: 12px;
+                            color: #475569;
+                            vertical-alignment: center;
+                        }
+                    }
+                }
+
+                // Table Body Scrollable
+                ScrollView {
+                    VerticalLayout {
+                        spacing: 2px;
+
+                        for item in root.items: Rectangle {
+                            height: 32px;
+                            border-radius: 4px;
+                            background: ta.has-hover ? #f8fafc : (root.input-text == item.text ? #e0f2fe : transparent);
+
+                            HorizontalLayout {
+                                padding-left: 12px;
+                                padding-right: 12px;
+                                spacing: 8px;
+
+                                Text {
+                                    width: 130px;
+                                    text: item.text;
+                                    font-weight: 600;
+                                    font-size: 12px;
+                                    color: #0284c7;
+                                    vertical-alignment: center;
+                                }
+                                Text {
+                                    horizontal-stretch: 1;
+                                    text: item.content;
+                                    font-size: 12px;
+                                    color: #1e293b;
+                                    vertical-alignment: center;
+                                }
+                            }
+
+                            ta := TouchArea {
+                                clicked => {
+                                    root.input-text = item.text;
+                                    root.input-content = item.content;
+                                    root.is-editing = true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Input Form (Add / Edit / Delete)
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 12px;
+                spacing: 10px;
+
+                HorizontalLayout {
+                    spacing: 10px;
+
+                    VerticalLayout {
+                        width: 140px;
+                        spacing: 4px;
+                        Text {
+                            text: "Từ gõ tắt:";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #334155;
+                        }
+                        LineEdit {
+                            text <=> root.input-text;
+                            placeholder-text: "vd: ko";
+                            edited => { root.input-text-changed(root.input-text); }
+                        }
+
+                    }
+
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        Text {
+                            text: "Nội dung thay thế:";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #334155;
+                        }
+                        LineEdit {
+                            text <=> root.input-content;
+                            placeholder-text: "vd: không";
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    alignment: space-between;
+
+                    CheckBox {
+                        text: "Tự động đổi hoa / thường theo từ viết tắt";
+                        checked <=> root.opt-auto-caps;
+                        toggled => { root.autocaps-toggled(root.opt-auto-caps); }
+                    }
+
+                    HorizontalLayout {
+                        spacing: 8px;
+
+                        Button {
+                            text: root.is-editing ? "Lưu sửa đổi" : "+ Thêm mới";
+                            primary: true;
+                            clicked => {
+                                root.add-or-update-macro(root.input-text, root.input-content);
+                                root.input-text = "";
+                                root.input-content = "";
+                                root.is-editing = false;
+                            }
+                        }
+
+                        Button {
+                            text: "Xoá";
+                            enabled: root.input-text != "";
+                            clicked => {
+                                root.delete-macro(root.input-text);
+                                root.input-text = "";
+                                root.input-content = "";
+                                root.is-editing = false;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Action Buttons: Import, Export, Close
+        HorizontalLayout {
+            alignment: space-between;
+
+            HorizontalLayout {
+                spacing: 8px;
+
+                Button {
+                    text: "Nạp từ file (.txt)...";
+                    clicked => { root.import-clicked(); }
+                }
+
+                Button {
+                    text: "Xuất ra file (.txt)...";
+                    clicked => { root.export-clicked(); }
+                }
+            }
+
+            Button {
+                text: "Đóng";
+                primary: true;
+                clicked => { root.close-window(); }
+            }
+        }
+    }
+}
+
+export component ConvertWindow inherits Window {
+    title: "Minkey - Công Cụ Chuyển Mã";
+    preferred-width: 520px;
+    preferred-height: 540px;
+    min-width: 480px;
+    min-height: 500px;
+    background: #f8fafc;
+    default-font-family: "Segoe UI, Inter, sans-serif";
+
+    in-out property <int> selected-from-code: 0;
+    in-out property <int> selected-to-code: 1;
+
+    in-out property <bool> opt-to-all-caps: false;
+    in-out property <bool> opt-to-all-non-caps: false;
+    in-out property <bool> opt-to-caps-first-letter: false;
+    in-out property <bool> opt-to-caps-each-word: false;
+    in-out property <bool> opt-remove-mark: false;
+    in-out property <bool> opt-dont-alert: false;
+
+    // Hotkey for quick convert
+    in-out property <bool> switch-ctrl: false;
+    in-out property <bool> switch-alt: false;
+    in-out property <bool> switch-win: false;
+    in-out property <bool> switch-shift: false;
+    in-out property <string> switch-key: "";
+
+    callback swap-codes();
+    callback codes-changed();
+    callback setting-changed(string, bool);
+    callback hotkey-changed();
+    callback convert-clicked();
+    callback close-window();
+
+    VerticalLayout {
+        padding: 16px;
+        spacing: 12px;
+
+        // Card 1: Encoding Code Tables
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 14px;
+                spacing: 10px;
+
+                Text {
+                    text: "Bảng mã chuyển đổi";
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #1e293b;
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+                    alignment: center;
+
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        Text {
+                            text: "Nguồn (From):";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #475569;
+                        }
+                        ComboBox {
+                            model: ["Unicode dựng sẵn", "TCVN3 (ABC)", "VNI Windows", "Unicode Tổ hợp", "Vietnamese Locale CP 1258"];
+                            current-index <=> root.selected-from-code;
+                            selected(val) => { root.codes-changed(); }
+                        }
+                    }
+
+                    VerticalLayout {
+                        alignment: end;
+                        padding-bottom: 2px;
+                        Button {
+                            text: "⇄ Đảo";
+                            clicked => { root.swap-codes(); }
+                        }
+                    }
+
+                    VerticalLayout {
+                        horizontal-stretch: 1;
+                        spacing: 4px;
+                        Text {
+                            text: "Đích (To):";
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #475569;
+                        }
+                        ComboBox {
+                            model: ["Unicode dựng sẵn", "TCVN3 (ABC)", "VNI Windows", "Unicode Tổ hợp", "Vietnamese Locale CP 1258"];
+                            current-index <=> root.selected-to-code;
+                            selected(val) => { root.codes-changed(); }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Card 2: Conversion Options
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 14px;
+                spacing: 8px;
+
+                Text {
+                    text: "Tùy chọn biến đổi văn bản";
+                    font-size: 14px;
+                    font-weight: 700;
+                    color: #1e293b;
+                }
+
+                CheckBox {
+                    text: "Chuyển sang chữ HOA (ALL CAPS)";
+                    checked <=> root.opt-to-all-caps;
+                    toggled => { root.setting-changed("to_all_caps", root.opt-to-all-caps); }
+                }
+
+                CheckBox {
+                    text: "Chuyển sang chữ thường (all lower)";
+                    checked <=> root.opt-to-all-non-caps;
+                    toggled => { root.setting-changed("to_all_non_caps", root.opt-to-all-non-caps); }
+                }
+
+                CheckBox {
+                    text: "Viết hoa chữ đầu mỗi từ (Title Case)";
+                    checked <=> root.opt-to-caps-each-word;
+                    toggled => { root.setting-changed("to_caps_each_word", root.opt-to-caps-each_word); }
+                }
+
+                CheckBox {
+                    text: "Viết hoa chữ cái đầu câu (Sentence case)";
+                    checked <=> root.opt-to-caps-first-letter;
+                    toggled => { root.setting-changed("to_caps_first_letter", root.opt-to-caps-first-letter); }
+                }
+
+                Rectangle {
+                    height: 1px;
+                    background: #f1f5f9;
+                }
+
+                CheckBox {
+                    text: "Không dùng dấu (Loại bỏ dấu tiếng Việt)";
+                    checked <=> root.opt-remove-mark;
+                    toggled => { root.setting-changed("remove_mark", root.opt-remove-mark); }
+                }
+
+                CheckBox {
+                    text: "Không hiện thông báo sau khi chuyển mã xong";
+                    checked <=> root.opt-dont-alert;
+                    toggled => { root.setting-changed("dont_alert", root.opt-dont-alert); }
+                }
+            }
+        }
+
+        // Card 3: Quick Convert Hotkey
+        Rectangle {
+            background: #ffffff;
+            border-radius: 10px;
+            border-width: 1px;
+            border-color: #e2e8f0;
+
+            VerticalLayout {
+                padding: 14px;
+                spacing: 8px;
+
+                Text {
+                    text: "Phím tắt chuyển nhanh Clipboard:";
+                    font-size: 12px;
+                    font-weight: 600;
+                    color: #334155;
+                }
+
+                HorizontalLayout {
+                    spacing: 8px;
+                    alignment: start;
+
+                    CheckBox {
+                        text: "Ctrl";
+                        checked <=> root.switch-ctrl;
+                        toggled => { root.hotkey-changed(); }
+                    }
+                    CheckBox {
+                        text: "Alt";
+                        checked <=> root.switch-alt;
+                        toggled => { root.hotkey-changed(); }
+                    }
+                    CheckBox {
+                        text: "Win";
+                        checked <=> root.switch-win;
+                        toggled => { root.hotkey-changed(); }
+                    }
+                    CheckBox {
+                        text: "Shift";
+                        checked <=> root.switch-shift;
+                        toggled => { root.hotkey-changed(); }
+                    }
+
+                    Text {
+                        text: "+";
+                        vertical-alignment: center;
+                        font-size: 13px;
+                        font-weight: 700;
+                        color: #64748b;
+                    }
+
+                    LineEdit {
+                        text <=> root.switch-key;
+                        width: 45px;
+                        horizontal-alignment: center;
+                        placeholder-text: "F9";
+                        edited => { root.hotkey-changed(); }
+                    }
+                }
+            }
+        }
+
+        // Footer Actions
+        HorizontalLayout {
+            alignment: space-between;
+
+            Button {
+                text: "Chuyển mã Clipboard";
+                primary: true;
+                clicked => { root.convert-clicked(); }
+            }
+
+            Button {
+                text: "Đóng";
+                clicked => { root.close-window(); }
+            }
+        }
+    }
+}
+
+

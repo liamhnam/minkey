@@ -1,26 +1,41 @@
 // Windows Low-Level Keyboard and Mouse Hook Manager
 // Ported directly from OpenKey.cpp
 
-use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
+use std::sync::atomic::{AtomicBool, AtomicU32};
+#[cfg(windows)]
+use std::sync::atomic::Ordering;
+#[cfg(windows)]
+use std::sync::Mutex;
+#[cfg(windows)]
 use std::thread;
 
+#[cfg(windows)]
 use windows_sys::Win32::Foundation::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
+#[cfg(windows)]
 use windows_sys::Win32::System::Threading::{GetCurrentThread, SetThreadPriority, THREAD_PRIORITY_HIGHEST};
+#[cfg(windows)]
 use windows_sys::Win32::UI::Input::Ime::*;
+#[cfg(windows)]
 use windows_sys::Win32::UI::Input::KeyboardAndMouse::*;
+#[cfg(windows)]
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
+#[cfg(windows)]
 use crate::tables::*;
+#[cfg(windows)]
 use crate::types::{
     CAPS_MASK, CHAR_CODE_MASK, HookCodeState, KeyEvent, KeyEventState,
 };
+#[cfg(windows)]
 use crate::VietnameseEngine;
 
+#[cfg(windows)]
 #[link(name = "user32")]
 unsafe extern "system" {
-    pub fn MessageBeep(u_type: u32) -> i32;
+    pub safe fn MessageBeep(u_type: u32) -> i32;
     pub fn SetWinEventHook(
         event_min: u32,
         event_max: u32,
@@ -33,14 +48,27 @@ unsafe extern "system" {
     pub fn UnhookWinEvent(h_win_event_hook: isize) -> i32;
 }
 
+#[cfg(target_os = "macos")]
+#[allow(non_snake_case)]
+pub fn MessageBeep(_u_type: u32) -> i32 {
+    #[link(name = "AppKit", kind = "framework")]
+    unsafe extern "C" {
+        fn NSBeep();
+    }
+    unsafe { NSBeep() };
+    0
+}
+
 pub const EVENT_SYSTEM_FOREGROUND: u32 = 0x0003;
 pub const WINEVENT_OUTOFCONTEXT: u32 = 0x0000;
 pub const WINEVENT_SKIPOWNPROCESS: u32 = 0x0002;
 
+#[cfg(windows)]
 #[link(name = "kernel32")]
 unsafe extern "system" {
     pub fn GetCurrentThreadId() -> u32;
 }
+
 
 
 // Windows IME Message constant
@@ -55,7 +83,7 @@ pub const MASK_NUMLOCK: u16 = 0x10;
 pub const MASK_CAPITAL: u16 = 0x20;
 pub const MASK_SCROLL: u16 = 0x40;
 
-pub const DEFAULT_SWITCH_STATUS: u32 = 0x7A000206; // Alt + Z
+pub use crate::config::DEFAULT_SWITCH_STATUS;
 pub const EMPTY_HOTKEY: u32 = 0x00FE;
 
 #[derive(Debug, Clone)]
@@ -95,10 +123,25 @@ impl Default for HookConfig {
     }
 }
 
+#[cfg(windows)]
+pub type PlatformHookService = WindowsHookService;
+
+#[cfg(not(windows))]
+pub use crate::hook_macos::MacHookService;
+
+#[cfg(not(windows))]
+pub type PlatformHookService = MacHookService;
+
+#[cfg(not(windows))]
+pub type WindowsHookService = MacHookService;
+
 // Global hook state singleton accessed from Windows callback procedures
+#[cfg(windows)]
 static mut GLOBAL_HOOK: *mut HookStateContext = std::ptr::null_mut();
 
+#[cfg(windows)]
 struct HookStateContext {
+
     config: HookConfig,
     engine: Arc<Mutex<VietnameseEngine>>,
     smart_switch: Arc<Mutex<crate::smart_switch::SmartSwitchTable>>,
@@ -116,6 +159,7 @@ struct HookStateContext {
     on_quick_convert: Option<Box<dyn Fn() + Send + Sync>>,
 }
 
+#[cfg(windows)]
 pub struct WindowsHookService {
     config: HookConfig,
     engine: Arc<Mutex<VietnameseEngine>>,
@@ -124,8 +168,10 @@ pub struct WindowsHookService {
     thread_id: Arc<AtomicU32>,
 }
 
+#[cfg(windows)]
 impl WindowsHookService {
     pub fn new(
+
         config: HookConfig,
         engine: Arc<Mutex<VietnameseEngine>>,
         smart_switch: Arc<Mutex<crate::smart_switch::SmartSwitchTable>>,
@@ -246,6 +292,7 @@ impl WindowsHookService {
 }
 
 // Low-level keyboard hook callback procedure
+#[cfg(windows)]
 unsafe extern "system" fn keyboard_hook_proc(n_code: i32, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     if n_code < 0 {
         return unsafe { CallNextHookEx(std::ptr::null_mut(), n_code, w_param, l_param) };
@@ -486,6 +533,7 @@ unsafe extern "system" fn keyboard_hook_proc(n_code: i32, w_param: WPARAM, l_par
 }
 
 // Low-level mouse hook callback procedure (breaks typing session on mouse click)
+#[cfg(windows)]
 unsafe extern "system" fn mouse_hook_proc(n_code: i32, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     if n_code >= 0 {
         if w_param == WM_LBUTTONDOWN as usize || w_param == WM_RBUTTONDOWN as usize || w_param == WM_MBUTTONDOWN as usize {
@@ -505,6 +553,7 @@ unsafe extern "system" fn mouse_hook_proc(n_code: i32, w_param: WPARAM, l_param:
 }
 
 // Foreground window event callback for Smart Switch Key and App Memory
+#[cfg(windows)]
 unsafe extern "system" fn win_event_proc_callback(
     _h_win_event_hook: isize,
     _dw_event: u32,
@@ -601,6 +650,7 @@ unsafe extern "system" fn win_event_proc_callback(
     }
 }
 
+#[cfg(windows)]
 fn set_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     unsafe {
         if GetKeyState(VK_CAPITAL as i32) == 1 { ctx.flag |= MASK_CAPITAL; } else { ctx.flag &= !MASK_CAPITAL; }
@@ -616,6 +666,7 @@ fn set_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     }
 }
 
+#[cfg(windows)]
 fn unset_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     match vk {
         VK_LSHIFT | VK_RSHIFT => { ctx.flag &= !MASK_SHIFT; ctx.is_flag_key = true; }
@@ -628,6 +679,7 @@ fn unset_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     }
 }
 
+#[cfg(windows)]
 fn check_hot_key(hotkey: u32, flag: u16, keycode: u16, check_code: bool) -> bool {
     if (hotkey & !0x8000) == EMPTY_HOTKEY {
         return false;
@@ -655,6 +707,7 @@ fn check_hot_key(hotkey: u32, flag: u16, keycode: u16, check_code: bool) -> bool
     true
 }
 
+#[cfg(windows)]
 fn switch_language_internal(ctx: &mut HookStateContext) {
     let cur = ctx.config.language.load(Ordering::SeqCst);
     let next = if cur == 0 { 1 } else { 0 };
@@ -662,7 +715,7 @@ fn switch_language_internal(ctx: &mut HookStateContext) {
 
     let hotkey = ctx.config.switch_key_status.load(Ordering::Relaxed);
     if (hotkey & 0x8000) != 0 {
-        unsafe { MessageBeep(MB_OK); }
+        MessageBeep(MB_OK);
     }
 
     if let Ok(mut engine) = ctx.engine.lock() {
@@ -686,12 +739,14 @@ fn switch_language_internal(ctx: &mut HookStateContext) {
     }
 }
 
+#[cfg(windows)]
 #[inline]
 fn is_double_code(code_table: usize) -> bool {
     code_table == 2 || code_table == 3
 }
 
 // Low-level SendInput helpers
+#[cfg(windows)]
 unsafe fn send_backspace() {
     unsafe {
         let mut inputs = [std::mem::zeroed::<INPUT>(); 2];
@@ -708,6 +763,7 @@ unsafe fn send_backspace() {
     }
 }
 
+#[cfg(windows)]
 unsafe fn send_empty_character(code_table: usize, sync_key: &mut Vec<u8>) {
     if is_double_code(code_table) {
         sync_key.push(1);
@@ -728,6 +784,7 @@ unsafe fn send_empty_character(code_table: usize, sync_key: &mut Vec<u8>) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn send_unicode_char(ch: u16) {
     unsafe {
         let mut inputs = [std::mem::zeroed::<INPUT>(); 2];
@@ -745,6 +802,7 @@ unsafe fn send_unicode_char(ch: u16) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn send_key_code(data: u32, code_table: usize, sync_key: &mut Vec<u8>) {
     if (data & CHAR_CODE_MASK) == 0 {
         if is_double_code(code_table) {
@@ -802,6 +860,7 @@ unsafe fn send_key_code(data: u32, code_table: usize, sync_key: &mut Vec<u8>) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn send_combine_key(key1: u16, key2: u16, flag1: u32, flag2: u32) {
     unsafe {
         let mut inputs = [std::mem::zeroed::<INPUT>(); 4];

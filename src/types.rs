@@ -225,3 +225,77 @@ pub fn is_vni_code(code: usize) -> bool {
 pub fn is_number_key(code: u16) -> bool {
     matches!(code, KEY_1 | KEY_2 | KEY_3 | KEY_4 | KEY_5 | KEY_6 | KEY_7 | KEY_8 | KEY_9 | KEY_0)
 }
+
+/// Translates a macOS Carbon/CoreGraphics virtual keycode into Minkey internal keycode
+#[inline]
+pub fn mac_keycode_to_engine_key(mac_code: u16) -> u16 {
+    match mac_code {
+        0 => KEY_A,
+        1 => KEY_S,
+        2 => KEY_D,
+        3 => KEY_F,
+        4 => KEY_H,
+        5 => KEY_G,
+        6 => KEY_Z,
+        7 => KEY_X,
+        8 => KEY_C,
+        9 => KEY_V,
+        11 => KEY_B,
+        12 => KEY_Q,
+        13 => KEY_W,
+        14 => KEY_E,
+        15 => KEY_R,
+        16 => KEY_Y,
+        17 => KEY_T,
+        18 => KEY_1,
+        19 => KEY_2,
+        20 => KEY_3,
+        21 => KEY_4,
+        22 => KEY_6,
+        23 => KEY_5,
+        24 => KEY_EQUALS,
+        25 => KEY_9,
+        26 => KEY_7,
+        27 => KEY_MINUS,
+        28 => KEY_8,
+        29 => KEY_0,
+        30 => KEY_RIGHT_BRACKET,
+        31 => KEY_O,
+        32 => KEY_U,
+        33 => KEY_LEFT_BRACKET,
+        34 => KEY_I,
+        35 => KEY_P,
+        36 => KEY_RETURN,
+        37 => KEY_L,
+        38 => KEY_J,
+        39 => KEY_QUOTE,
+        40 => KEY_K,
+        41 => KEY_SEMICOLON,
+        42 => KEY_BACK_SLASH,
+        43 => KEY_COMMA,
+        44 => KEY_SLASH,
+        45 => KEY_N,
+        46 => KEY_M,
+        47 => KEY_DOT,
+        48 => KEY_TAB,
+        49 => KEY_SPACE,
+        50 => KEY_BACKQUOTE,
+        51 => KEY_DELETE,
+        53 => KEY_ESC,
+        123 => KEY_LEFT,
+        124 => KEY_RIGHT,
+        125 => KEY_DOWN,
+        126 => KEY_UP,
+        76 => KEY_ENTER,       // keypad Enter
+        114 => VK_HELP,
+        115 => VK_HOME,
+        116 => VK_PRIOR,
+        117 => VK_DELETE_SYS,  // forward delete
+        119 => VK_END,
+        121 => VK_NEXT,
+        // Keypad, function and other keys: macOS codes overlap Windows VK letters (65..90),
+        // so never pass them through raw. VK_SELECT is a harmless word-break code.
+        _ => VK_SELECT,
+    }
+}
+

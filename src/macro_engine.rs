@@ -274,6 +274,7 @@ pub fn string_to_macro_key_codes(s: &str, code_table: usize) -> Vec<u32> {
     out
 }
 
+#[cfg(windows)]
 #[repr(C)]
 #[allow(non_snake_case)]
 pub struct OPENFILENAMEW {
@@ -302,12 +303,14 @@ pub struct OPENFILENAMEW {
     pub FlagsEx: u32,
 }
 
+#[cfg(windows)]
 #[link(name = "comdlg32")]
 unsafe extern "system" {
     pub fn GetOpenFileNameW(lpofn: *mut OPENFILENAMEW) -> i32;
     pub fn GetSaveFileNameW(lpofn: *mut OPENFILENAMEW) -> i32;
 }
 
+#[cfg(windows)]
 pub fn open_macro_file_dialog() -> Option<String> {
     unsafe {
         let mut buffer = [0u16; 1024];
@@ -328,6 +331,7 @@ pub fn open_macro_file_dialog() -> Option<String> {
     }
 }
 
+#[cfg(windows)]
 pub fn save_macro_file_dialog() -> Option<String> {
     unsafe {
         let mut buffer = [0u16; 1024];
@@ -353,18 +357,16 @@ pub fn save_macro_file_dialog() -> Option<String> {
     }
 }
 
-pub fn ask_keep_existing_macros() -> bool {
-    unsafe {
-        let text: Vec<u16> = "Bạn có muốn giữ lại dữ liệu hiện tại không?\0".encode_utf16().collect();
-        let title: Vec<u16> = "Dữ liệu gõ tắt\0".encode_utf16().collect();
-        let res = windows_sys::Win32::UI::WindowsAndMessaging::MessageBoxW(
-            std::ptr::null_mut(),
-            text.as_ptr(),
-            title.as_ptr(),
-            windows_sys::Win32::UI::WindowsAndMessaging::MB_ICONEXCLAMATION | windows_sys::Win32::UI::WindowsAndMessaging::MB_YESNO,
-        );
-        res == windows_sys::Win32::UI::WindowsAndMessaging::IDYES
-    }
+#[cfg(target_os = "macos")]
+pub fn open_macro_file_dialog() -> Option<String> {
+    crate::dialog::choose_file("Chọn file gõ tắt")
 }
 
+#[cfg(target_os = "macos")]
+pub fn save_macro_file_dialog() -> Option<String> {
+    crate::dialog::choose_save_file("Lưu file gõ tắt", "OpenKeyMacro.txt")
+}
 
+pub fn ask_keep_existing_macros() -> bool {
+    crate::dialog::confirm("Dữ liệu gõ tắt", "Bạn có muốn giữ lại dữ liệu hiện tại không?")
+}

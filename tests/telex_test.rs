@@ -143,3 +143,26 @@ fn test_restore_wrong_spelling_on_space() {
 
 
 
+
+// Regressions found by tests/openkey_parity_test.rs
+
+#[test]
+fn test_gi_takes_tone() {
+    let mut engine = VietnameseEngine::new();
+    assert_eq!(engine.type_string("gif gis gix gij gir"), "gì gí gĩ gị gỉ");
+}
+
+#[test]
+fn test_w_that_does_not_apply_is_typed_as_letter() {
+    let mut engine = VietnameseEngine::new();
+    engine.set_check_spelling(false);
+    engine.restore_if_wrong_spelling = false;
+    // "ao" can't take a horn: "w" must be a normal letter, not duplicate the word
+    assert_eq!(engine.type_string("taorw"), "tảow");
+}
+
+#[test]
+fn test_capitalised_thuo() {
+    let mut engine = VietnameseEngine::new();
+    assert_eq!(engine.type_string("Thuowr"), "Thuở");
+}

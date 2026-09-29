@@ -119,16 +119,7 @@ pub fn setup_ui_callbacks(
                     }
                 }
             }
-            if tray_hwnd != 0 {
-                unsafe {
-                    windows_sys::Win32::UI::WindowsAndMessaging::PostMessageW(
-                        tray_hwnd as windows_sys::Win32::Foundation::HWND,
-                        windows_sys::Win32::UI::WindowsAndMessaging::WM_USER + 2026,
-                        0,
-                        0,
-                    );
-                }
-            }
+            crate::tray::refresh_tray(tray_hwnd);
             config.save_to_registry();
         });
     }
@@ -271,16 +262,7 @@ pub fn setup_ui_callbacks(
                 }
                 "modern_icon" => {
                     config.use_gray_icon.store(val, Ordering::Relaxed);
-                    if tray_hwnd != 0 {
-                        unsafe {
-                            windows_sys::Win32::UI::WindowsAndMessaging::PostMessageW(
-                                tray_hwnd as windows_sys::Win32::Foundation::HWND,
-                                windows_sys::Win32::UI::WindowsAndMessaging::WM_USER + 2026,
-                                0,
-                                0,
-                            );
-                        }
-                    }
+                    crate::tray::refresh_tray(tray_hwnd);
                 }
                 "show_on_startup" => {
                     config.show_on_startup.store(val, Ordering::Relaxed);
@@ -292,17 +274,10 @@ pub fn setup_ui_callbacks(
                 "run_as_admin" => {
                     config.run_as_admin.store(val, Ordering::Relaxed);
                     if val && !crate::config::is_user_an_admin() {
-                        let text: Vec<u16> = "Bạn cần phải khởi động lại Minkey để kích hoạt chế độ Admin!\nBạn có muốn khởi động lại Minkey không?\0".encode_utf16().collect();
-                        let title: Vec<u16> = "Minkey\0".encode_utf16().collect();
-                        let res = unsafe {
-                            windows_sys::Win32::UI::WindowsAndMessaging::MessageBoxW(
-                                std::ptr::null_mut(),
-                                text.as_ptr(),
-                                title.as_ptr(),
-                                windows_sys::Win32::UI::WindowsAndMessaging::MB_ICONEXCLAMATION | windows_sys::Win32::UI::WindowsAndMessaging::MB_YESNO,
-                            )
-                        };
-                        if res == windows_sys::Win32::UI::WindowsAndMessaging::IDYES {
+                        if crate::dialog::confirm(
+                            "Minkey",
+                            "Bạn cần phải khởi động lại Minkey để kích hoạt chế độ Admin!\nBạn có muốn khởi động lại Minkey không?",
+                        ) {
                             crate::config::relaunch_as_admin();
                             let _ = slint::invoke_from_event_loop(|| {
                                 let _ = slint::quit_event_loop();
@@ -342,17 +317,7 @@ pub fn setup_ui_callbacks(
         let engine = engine.clone();
         let ui_weak = ui_weak.clone();
         ui.on_reset_defaults(move || {
-            let text: Vec<u16> = "Bạn có chắc chắn muốn thiết lập lại cài đặt gốc?\0".encode_utf16().collect();
-            let title: Vec<u16> = "Minkey\0".encode_utf16().collect();
-            let res = unsafe {
-                windows_sys::Win32::UI::WindowsAndMessaging::MessageBoxW(
-                    std::ptr::null_mut(),
-                    text.as_ptr(),
-                    title.as_ptr(),
-                    windows_sys::Win32::UI::WindowsAndMessaging::MB_ICONEXCLAMATION | windows_sys::Win32::UI::WindowsAndMessaging::MB_YESNO,
-                )
-            };
-            if res != windows_sys::Win32::UI::WindowsAndMessaging::IDYES {
+            if !crate::dialog::confirm("Minkey", "Bạn có chắc chắn muốn thiết lập lại cài đặt gốc?") {
                 return;
             }
 
@@ -418,23 +383,12 @@ pub fn setup_ui_callbacks(
 
     // Open GitHub
     ui.on_open_github(|| {
-        let _ = std::process::Command::new("cmd")
-            .args(["/C", "start", "https://github.com/tuyenvm/OpenKey"])
-            .status();
+        crate::dialog::open_url("https://github.com/tuyenvm/OpenKey");
     });
 
     // Check Update
     ui.on_check_update_clicked(|| {
-        let text: Vec<u16> = "Bạn đang sử dụng phiên bản mới nhất! (Minkey v0.1.0)\0".encode_utf16().collect();
-        let title: Vec<u16> = "Minkey - Cập nhật\0".encode_utf16().collect();
-        unsafe {
-            windows_sys::Win32::UI::WindowsAndMessaging::MessageBoxW(
-                std::ptr::null_mut(),
-                text.as_ptr(),
-                title.as_ptr(),
-                windows_sys::Win32::UI::WindowsAndMessaging::MB_ICONINFORMATION | windows_sys::Win32::UI::WindowsAndMessaging::MB_OK,
-            );
-        }
+        crate::dialog::alert("Minkey - Cập nhật", "Bạn đang sử dụng phiên bản mới nhất! (Minkey v0.1.0)");
     });
 
     // Close window (Hide to tray)
@@ -823,18 +777,9 @@ pub fn setup_convert_window_callbacks(
             let ok = crate::convert::quick_convert_clipboard(&opts);
             if ok {
                 if !opts.dont_alert {
-                    unsafe {
-                        let text: Vec<u16> = "Đã chuyển mã nội dung Clipboard thành công!\0".encode_utf16().collect();
-                        let title: Vec<u16> = "Minkey - Chuyển mã\0".encode_utf16().collect();
-                        windows_sys::Win32::UI::WindowsAndMessaging::MessageBoxW(
-                            std::ptr::null_mut(),
-                            text.as_ptr(),
-                            title.as_ptr(),
-                            windows_sys::Win32::UI::WindowsAndMessaging::MB_ICONINFORMATION | windows_sys::Win32::UI::WindowsAndMessaging::MB_OK,
-                        );
-                    }
+                    crate::dialog::alert("Minkey - Chuyển mã", "Đã chuyển mã nội dung Clipboard thành công!");
                 } else {
-                    unsafe { crate::hook::MessageBeep(0) };
+                    crate::hook::MessageBeep(0);
                 }
             }
         });

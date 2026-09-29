@@ -537,6 +537,8 @@ pub fn key_code_to_character(key_code: u32) -> u16 {
 }
 
 pub fn get_character_code(data: u32, code_table: usize) -> u32 {
+    // STANDALONE_MASK is engine bookkeeping ("[" / "]" / "w" typed alone), never part of the output
+    let data = data & !STANDALONE_MASK;
     let caps_elem = if (data & CAPS_MASK) != 0 { 0 } else { 1 };
     let mut key = data & CHAR_MASK;
     let tables = &*CODE_TABLES;

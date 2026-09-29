@@ -493,11 +493,9 @@ impl VietnameseEngine {
                 bpc = (self.index - vwsm) as u8;
             }
         }
-        // Rule 3.2
-        else if (self.chr(vsi) == KEY_I && self.chr(vsi + 1) == KEY_A)
-            || (self.chr(vsi) == KEY_Y && self.chr(vsi + 1) == KEY_A)
-            || (self.chr(vsi) == KEY_U && self.chr(vsi + 1) == KEY_A)
-            || (self.chr(vsi) == KEY_U && (self.typing_word[vsi + 1] == (KEY_U as u32 | TONEW_MASK))) {
+        // Rule 3.2. OpenKey's ia / ya / ua checks compare CHR(VSI) with two different keys and never
+        // match, so only the "uư" case takes effect; keep that behaviour (ua is handled by rule 4).
+        else if self.chr(vsi) == KEY_U && (self.typing_word[vsi + 1] == (KEY_U as u32 | TONEW_MASK)) {
             vwsm = vsi;
             bpc = (self.index - vwsm) as u8;
         }
@@ -534,11 +532,9 @@ impl VietnameseEngine {
     }
 
     fn handle_old_mark(&self, vsi: usize, vei: usize, vowel_count: usize) -> (usize, u8) {
-        let mut vwsm = if vowel_count == 0 && self.chr(vei) == KEY_I {
-            vei
-        } else {
-            vsi
-        };
+        // No vowel of its own ("gi", "qu"): mark the i / u. OpenKey only does this for "gi" and
+        // puts the mark on "q" for "qu", producing a character that doesn't exist.
+        let mut vwsm = if vowel_count == 0 { vei } else { vsi };
         let mut bpc = (self.index - vwsm) as u8;
 
         if vowel_count == 3 || (vei + 1 < self.index && is_consonant(self.chr(vei + 1)) && self.can_has_end_consonant(vsi, vei)) {
@@ -558,17 +554,16 @@ impl VietnameseEngine {
         (vwsm, bpc)
     }
 
-    fn insert_mark(&mut self, mark_mask: u32, can_modify_flag: bool) {
+    /// Places `mark_mask` on the right vowel; returns the index of that vowel
+    fn insert_mark(&mut self, mark_mask: u32, can_modify_flag: bool) -> usize {
         if can_modify_flag {
             self.hook_state.code = HookCodeState::WillProcess;
         }
         self.hook_state.backspace_count = 0;
         self.hook_state.new_char_count = 0;
 
+        // vowel_count can be 0 for "gi" ("i" belongs to the consonant): OpenKey still places the mark
         let (vsi, vei, vowel_count) = self.find_and_calculate_vowel(false);
-        if vowel_count == 0 {
-            return;
-        }
 
         let (vwsm, mut bpc) = if vowel_count == 1 {
             (vei, (self.index - vei) as u8)
@@ -614,6 +609,7 @@ impl VietnameseEngine {
 
         self.hook_state.backspace_count = bpc;
         self.hook_state.new_char_count = bpc;
+        vwsm
     }
 
     fn remove_mark(&mut self) {
@@ -683,7 +679,7 @@ impl VietnameseEngine {
                 if (self.typing_word[ii] & TONE_MASK) != 0 {
                     self.hook_state.code = HookCodeState::Restore;
                     self.typing_word[ii] &= !TONE_MASK;
-                    self.hook_state.char_data[self.index - 1 - ii] = self.typing_word[ii];
+                    self.hook_state.char_data[self.index - 1 - ii] = get_character_code(self.typing_word[ii], self.code_table);
                     self.temp_disable_key = true;
                     break;
                 } else {
@@ -713,7 +709,7 @@ impl VietnameseEngine {
                 if (self.typing_word[ii] & TONE_MASK) != 0 {
                     self.hook_state.code = HookCodeState::Restore;
                     self.typing_word[ii] &= !TONE_MASK;
-                    self.hook_state.char_data[self.index - 1 - ii] = self.typing_word[ii];
+                    self.hook_state.char_data[self.index - 1 - ii] = get_character_code(self.typing_word[ii], self.code_table);
                     if data != KEY_O {
                         self.temp_disable_key = true;
                     }
@@ -733,12 +729,15 @@ impl VietnameseEngine {
         self.hook_state.new_char_count = self.hook_state.backspace_count;
     }
 
-    fn insert_w(&mut self) {
+    /// Returns false when "w" does not apply to the current vowels (OpenKey's `isChanged = false`),
+    /// so the caller inserts it as a normal key instead.
+    fn insert_w(&mut self) -> bool {
         let (vsi, vei, vowel_count) = self.find_and_calculate_vowel(false);
         for ii in vsi..=vei {
             self.typing_word[ii] &= !TONE_MASK;
         }
 
+        let mut changed = true;
         if vowel_count > 1 {
             self.hook_state.backspace_count = (self.index - vsi) as u8;
             self.hook_state.new_char_count = self.hook_state.backspace_count;
@@ -777,13 +776,14 @@ impl VietnameseEngine {
                 } else {
                     self.temp_disable_key = true;
                     self.hook_state.code = HookCodeState::DoNothing;
+                    changed = false;
                 }
 
                 for ii in vsi..self.index {
                     self.hook_state.char_data[self.index - 1 - ii] = get_character_code(self.typing_word[ii], self.code_table);
                 }
             }
-            return;
+            return changed;
         }
 
         self.hook_state.code = HookCodeState::WillProcess;
@@ -805,11 +805,11 @@ impl VietnameseEngine {
                                 self.hook_state.code = HookCodeState::Restore;
                                 self.typing_word[ii] = (KEY_O as u32) | if (self.typing_word[ii] & CAPS_MASK) != 0 { CAPS_MASK } else { 0 };
                             }
-                            self.hook_state.char_data[self.index - 1 - ii] = self.typing_word[ii];
+                            self.hook_state.char_data[self.index - 1 - ii] = get_character_code(self.typing_word[ii], self.code_table);
                         } else {
                             self.hook_state.code = HookCodeState::Restore;
                             self.typing_word[ii] &= !TONEW_MASK;
-                            self.hook_state.char_data[self.index - 1 - ii] = self.typing_word[ii];
+                            self.hook_state.char_data[self.index - 1 - ii] = get_character_code(self.typing_word[ii], self.code_table);
                         }
                         self.temp_disable_key = true;
                     } else {
@@ -824,6 +824,7 @@ impl VietnameseEngine {
             }
         }
         self.hook_state.new_char_count = self.hook_state.backspace_count;
+        changed
     }
 
     fn reverse_last_standalone_char(&mut self, key_code: u32, is_caps: bool) {
@@ -916,8 +917,10 @@ impl VietnameseEngine {
                 if (self.typing_word[i] & MARK_MASK) != 0 {
                     let mark = self.typing_word[i] & MARK_MASK;
                     self.typing_word[i] &= !MARK_MASK;
-                    self.insert_mark(mark, false);
-                    is_checked_grammar = true;
+                    // Only resend the word when the mark actually moved to another vowel
+                    if self.insert_mark(mark, false) != i {
+                        is_checked_grammar = true;
+                    }
                     break;
                 }
             }
@@ -1189,12 +1192,13 @@ impl VietnameseEngine {
         }
 
         // Check vowel tone modifications (^ and w)
-        let mut vei = 0;
+        // VNI "6" applies to the last a / e / o; without one it is just a normal key
+        let mut vei = None;
         if self.input_type == InputType::Vni {
             for i in (0..self.index).rev() {
                 let c = self.chr(i);
                 if c == KEY_O || c == KEY_A || c == KEY_E {
-                    vei = i;
+                    vei = Some(i);
                     break;
                 }
             }
@@ -1206,7 +1210,7 @@ impl VietnameseEngine {
             if data == KEY_7 || data == KEY_8 {
                 KEY_W
             } else if data == KEY_6 {
-                self.chr(vei)
+                vei.map_or(data, |i| self.chr(i))
             } else {
                 data
             }
@@ -1232,13 +1236,13 @@ impl VietnameseEngine {
                                     break;
                                 }
                             }
-                            if (data == KEY_7 && self.chr(v_idx) == KEY_A && (v_idx >= 1 && self.chr(v_idx - 1) != KEY_U))
+                            // OpenKey leaves the key consumed here (isChanged stays true)
+                            if (data == KEY_7 && self.chr(v_idx) == KEY_A && (v_idx == 0 || self.chr(v_idx - 1) != KEY_U))
                                 || (data == KEY_8 && (self.chr(v_idx) == KEY_O || self.chr(v_idx) == KEY_U)) {
-                                is_changed = false;
                                 break;
                             }
                         }
-                        self.insert_w();
+                        is_changed = self.insert_w();
                     }
                     break;
                 }
@@ -1540,7 +1544,7 @@ impl VietnameseEngine {
                 self.handle_main_key(data, is_caps);
             }
 
-            if !self.free_mark && data != KEY_D {
+            if !self.free_mark && !self.is_key_d(data) {
                 if self.hook_state.code == HookCodeState::DoNothing {
                     self.check_grammar(-1);
                 } else {

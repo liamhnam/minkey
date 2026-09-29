@@ -1,11 +1,16 @@
-// Configuration management matching OpenKey registry schema: HKCU\Software\TuyenMai\OpenKey
+// Configuration management matching OpenKey schema (Registry on Windows, File on macOS/Linux)
 
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::Arc;
+
+#[cfg(windows)]
 use windows_sys::Win32::Foundation::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::Registry::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::LibraryLoader::GetModuleFileNameW;
 
+#[cfg(windows)]
 #[link(name = "advapi32")]
 unsafe extern "system" {
     pub fn RegCreateKeyExW(
@@ -21,13 +26,17 @@ unsafe extern "system" {
     ) -> i32;
 }
 
-
 pub const REGISTRY_KEY_PATH: &str = "Software\\TuyenMai\\OpenKey";
+
 pub const RUN_ON_STARTUP_KEY: &str = "Software\\Microsoft\\Windows\\CurrentVersion\\Run";
 
-pub const DEFAULT_SWITCH_STATUS: u32 = 0x7A000206; // Alt + Z
+// Low byte holds the Windows virtual key ('Z' = 0x5A); 0x200 = Alt / Option
+pub const DEFAULT_SWITCH_STATUS: u32 = 0x5A00025A; // Alt + Z
+// Old default that stored a macOS keycode (6) in the low byte, never matched on Windows
+const LEGACY_SWITCH_STATUS: u32 = 0x7A000206;
 pub const EMPTY_HOTKEY: u32 = 0x00FE;
 
+#[cfg(windows)]
 fn to_wide_null(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
 }
@@ -146,6 +155,7 @@ impl AppConfig {
 
 
 
+#[cfg(windows)]
 pub fn get_reg_int(key_name: &str, default_value: u32) -> u32 {
     unsafe {
         let sub_key = to_wide_null(REGISTRY_KEY_PATH);
@@ -183,6 +193,7 @@ pub fn get_reg_int(key_name: &str, default_value: u32) -> u32 {
     }
 }
 
+#[cfg(windows)]
 pub fn set_reg_int(key_name: &str, value: u32) {
     unsafe {
         let sub_key = to_wide_null(REGISTRY_KEY_PATH);
@@ -202,7 +213,6 @@ pub fn set_reg_int(key_name: &str, value: u32) {
             return;
         }
 
-
         let val_name = to_wide_null(key_name);
         let _ = RegSetValueExW(
             h_key,
@@ -217,6 +227,7 @@ pub fn set_reg_int(key_name: &str, value: u32) {
     }
 }
 
+#[cfg(windows)]
 pub fn get_reg_binary(key_name: &str) -> Option<Vec<u8>> {
     unsafe {
         let sub_key = to_wide_null(REGISTRY_KEY_PATH);
@@ -252,6 +263,7 @@ pub fn get_reg_binary(key_name: &str) -> Option<Vec<u8>> {
     }
 }
 
+#[cfg(windows)]
 pub fn set_reg_binary(key_name: &str, data: &[u8]) {
     unsafe {
         let sub_key = to_wide_null(REGISTRY_KEY_PATH);
@@ -259,7 +271,6 @@ pub fn set_reg_binary(key_name: &str, data: &[u8]) {
         if RegCreateKeyExW(HKEY_CURRENT_USER, sub_key.as_ptr(), 0, std::ptr::null(), REG_OPTION_NON_VOLATILE, KEY_WRITE, std::ptr::null(), &mut h_key, std::ptr::null_mut()) != ERROR_SUCCESS as i32 {
             return;
         }
-
 
         let val_name = to_wide_null(key_name);
         let _ = RegSetValueExW(
@@ -275,6 +286,48 @@ pub fn set_reg_binary(key_name: &str, data: &[u8]) {
     }
 }
 
+#[cfg(not(windows))]
+fn get_storage_dir() -> std::path::PathBuf {
+    let base = std::env::var_os("HOME")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|| std::path::PathBuf::from("."));
+    #[cfg(target_os = "macos")]
+    let dir = base.join("Library/Application Support/Minkey");
+    #[cfg(not(target_os = "macos"))]
+    let dir = base.join(".config/minkey");
+    let _ = std::fs::create_dir_all(&dir);
+    dir
+}
+
+#[cfg(not(windows))]
+pub fn get_reg_int(key_name: &str, default_value: u32) -> u32 {
+    let path = get_storage_dir().join(format!("{}.txt", key_name));
+    if let Ok(content) = std::fs::read_to_string(path) {
+        if let Ok(val) = content.trim().parse::<u32>() {
+            return val;
+        }
+    }
+    default_value
+}
+
+#[cfg(not(windows))]
+pub fn set_reg_int(key_name: &str, value: u32) {
+    let path = get_storage_dir().join(format!("{}.txt", key_name));
+    let _ = std::fs::write(path, value.to_string());
+}
+
+#[cfg(not(windows))]
+pub fn get_reg_binary(key_name: &str) -> Option<Vec<u8>> {
+    let path = get_storage_dir().join(format!("{}.bin", key_name));
+    std::fs::read(path).ok()
+}
+
+#[cfg(not(windows))]
+pub fn set_reg_binary(key_name: &str, data: &[u8]) {
+    let path = get_storage_dir().join(format!("{}.bin", key_name));
+    let _ = std::fs::write(path, data);
+}
+
 impl AppConfig {
     pub fn load_from_registry() -> Self {
         let config = Self::default();
@@ -285,7 +338,11 @@ impl AppConfig {
         config.check_spelling.store(get_reg_int("vCheckSpelling", 1) != 0, Ordering::Relaxed);
         config.use_modern_orthography.store(get_reg_int("vUseModernOrthography", 0) != 0, Ordering::Relaxed);
         config.quick_telex.store(get_reg_int("vQuickTelex", 0) != 0, Ordering::Relaxed);
-        config.switch_key_status.store(get_reg_int("vSwitchKeyStatus", DEFAULT_SWITCH_STATUS), Ordering::Relaxed);
+        let mut switch_key = get_reg_int("vSwitchKeyStatus", DEFAULT_SWITCH_STATUS);
+        if switch_key == LEGACY_SWITCH_STATUS {
+            switch_key = DEFAULT_SWITCH_STATUS;
+        }
+        config.switch_key_status.store(switch_key, Ordering::Relaxed);
         config.restore_if_wrong_spelling.store(get_reg_int("vRestoreIfWrongSpelling", 1) != 0, Ordering::Relaxed);
         config.fix_recommend_browser.store(get_reg_int("vFixRecommendBrowser", 1) != 0, Ordering::Relaxed);
         config.use_macro.store(get_reg_int("vUseMacro", 1) != 0, Ordering::Relaxed);
@@ -367,6 +424,7 @@ impl AppConfig {
     }
 }
 
+#[cfg(windows)]
 pub fn get_executable_path() -> String {
     unsafe {
         let mut buffer = [0u16; 1024];
@@ -379,6 +437,14 @@ pub fn get_executable_path() -> String {
     }
 }
 
+#[cfg(not(windows))]
+pub fn get_executable_path() -> String {
+    std::env::current_exe()
+        .map(|p| p.to_string_lossy().to_string())
+        .unwrap_or_default()
+}
+
+#[cfg(windows)]
 pub fn register_run_on_startup(enable: bool, run_as_admin: bool) {
     let exe_path = get_executable_path();
     if exe_path.is_empty() {
@@ -426,6 +492,10 @@ pub fn register_run_on_startup(enable: bool, run_as_admin: bool) {
     }
 }
 
+#[cfg(not(windows))]
+pub fn register_run_on_startup(_enable: bool, _run_as_admin: bool) {}
+
+#[cfg(windows)]
 #[link(name = "shell32")]
 unsafe extern "system" {
     pub fn IsUserAnAdmin() -> i32;
@@ -439,10 +509,17 @@ unsafe extern "system" {
     ) -> isize;
 }
 
+#[cfg(windows)]
 pub fn is_user_an_admin() -> bool {
     unsafe { IsUserAnAdmin() != 0 }
 }
 
+#[cfg(not(windows))]
+pub fn is_user_an_admin() -> bool {
+    false
+}
+
+#[cfg(windows)]
 pub fn relaunch_as_admin() {
     let exe = get_executable_path();
     if exe.is_empty() {
@@ -462,6 +539,10 @@ pub fn relaunch_as_admin() {
     }
 }
 
+#[cfg(not(windows))]
+pub fn relaunch_as_admin() {}
+
+#[cfg(windows)]
 pub fn create_desktop_shortcut() {
     let exe = get_executable_path();
     if exe.is_empty() {
@@ -478,4 +559,8 @@ pub fn create_desktop_shortcut() {
         .creation_flags(0x08000000) // CREATE_NO_WINDOW
         .status();
 }
+
+#[cfg(not(windows))]
+pub fn create_desktop_shortcut() {}
+
 

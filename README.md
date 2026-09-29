@@ -42,22 +42,24 @@ Minkey giữ **100% tính năng và hành vi sử dụng** của OpenKey gốc, 
   - Phím tắt chuyển mã nhanh toàn cục (Quick Convert Hotkey).
 - **Tự chuyển E/V theo ứng dụng (Smart Switch Key & App Memory)**:
   - Ghi nhớ ngôn ngữ (Anh/Việt) và bảng mã theo từng tiến trình ứng dụng riêng biệt (`EVENT_SYSTEM_FOREGROUND`).
+- **Đa nền tảng (Cross-Platform Native)**:
+  - **Windows 10 / 11**: Hỗ trợ Low-level Keyboard & Mouse Hook (`WH_KEYBOARD_LL`, `WH_MOUSE_LL`), System Tray, Registry.
+  - **macOS (Sonoma, Sequoia, v.v.)**: Hỗ trợ CoreGraphics Event Tap (`CGEventTapCreate`, `kCGSessionEventTap`), Menu Bar Status Item (`NSStatusBar`), tự động nhận diện Bundle ID ứng dụng.
 - **Giao diện & Hệ thống**:
   - Giao diện **Fluent Design** hiện đại xây dựng trên **Slint GUI**, hỗ trợ High-DPI sắc nét và giao diện sáng/tối tự nhiên.
-  - Biểu tượng khay hệ thống (System Tray) động: màu đỏ/cam cho Tiếng Việt, màu xanh dương cho Tiếng Anh, hoặc biểu tượng xám hiện đại.
-  - Tự phục hồi biểu tượng khay khi Windows Explorer khởi động lại (`TaskbarCreated`).
-  - Đơn phiên bản (Single Instance) an toàn qua Named Mutex.
-  - Khởi động cùng Windows (Registry `Run` hoặc Task Scheduler quyền cao nhất `schtasks`).
-  - Chạy quyền quản trị viên (Run as Administrator) qua `ShellExecuteW runas`.
-  - Tạo shortcut ngoài Desktop tự động.
+  - **Lazy UI Loading**: Khởi động siêu tốc, hoàn toàn không nạp giao diện đồ họa vào RAM khi chạy ngầm dưới khay hệ thống/menu bar.
+  - **Memory Trimming**: Tự động thu hồi bộ nhớ (`EmptyWorkingSet` trên Windows / `malloc_zone_pressure_relief` trên Mac) khi đóng cửa sổ.
+  - Biểu tượng khay hệ thống (System Tray / Menu Bar) động: màu đỏ/cam cho Tiếng Việt, màu xanh dương cho Tiếng Anh.
+  - Đơn phiên bản (Single Instance) an toàn.
 
 ---
 
 ## 🚀 Hiệu Năng & Tài Nguyên
 
 - **Zero Input Latency**: Low-Level Keyboard Hook chạy trên một dedicated OS thread độc lập với mức ưu tiên cao nhất (`THREAD_PRIORITY_HIGHEST`), tách biệt hoàn toàn khỏi thread giao diện đồ họa.
-- **Siêu nhẹ**:
-  - RAM tiêu thụ khi chạy nền ở khay hệ thống: **~10 - 15 MB**.
+- **Siêu nhẹ & Tiết kiệm tài nguyên**:
+  - RAM tiêu thụ khi chạy nền ở khay hệ thống / menu bar: **chỉ ~2 – 3 MB** (nhờ cơ chế Lazy UI Loading).
+  - Dung lượng file thực thi: **chỉ ~4 – 5 MB** (hoặc ~1.5 MB khi nén UPX) nhờ cấu hình biên dịch Release tối ưu hóa triệt để (`opt-level = "z"`, `lto = "fat"`, `panic = "abort"`, `strip = true`).
   - CPU tiêu thụ ở trạng thái chờ: **0.0%**.
 - **Độ ổn định cao**: Viết bằng Rust với bảo đảm an toàn bộ nhớ (memory safety), không rò rỉ bộ nhớ (zero memory leaks), sẵn sàng chạy nền liên tục 24/7.
 
@@ -66,22 +68,23 @@ Minkey giữ **100% tính năng và hành vi sử dụng** của OpenKey gốc, 
 ## 🛠️ Hướng Dẫn Biên Dịch & Chạy
 
 ### Yêu cầu hệ thống:
-- Hệ điều hành: Windows 10 / 11 (64-bit hoặc 32-bit).
-- Rust toolchain: phiên bản 1.80+ (khuyến nghị MSVC toolchain).
+- Hệ điều hành: Windows 10 / 11 hoặc macOS (Apple Silicon & Intel).
+- Rust toolchain: phiên bản 1.80+.
 
 ### Lệnh biên dịch:
 ```bash
-# Kiểm tra toàn bộ 33 automated tests
+# Kiểm tra toàn bộ automated tests
 cargo test --release
 
-# Biên dịch bản phát hành tối ưu hóa (Release)
+# Biên dịch bản phát hành siêu nhẹ tối ưu hóa (Release)
 cargo build --release
 ```
 
 File thực thi độc lập sẽ nằm tại:
 ```
-target/release/minkey.exe
+target/release/minkey (trên macOS) hoặc target/release/minkey.exe (trên Windows)
 ```
+
 
 ---
 

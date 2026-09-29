@@ -3,10 +3,14 @@
 
 use std::collections::BTreeMap;
 use std::sync::Mutex;
+#[cfg(windows)]
 use windows_sys::Win32::Foundation::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::Threading::*;
+#[cfg(windows)]
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
+#[cfg(windows)]
 #[link(name = "kernel32")]
 unsafe extern "system" {
     pub fn QueryFullProcessImageNameW(
@@ -16,6 +20,7 @@ unsafe extern "system" {
         lpdw_size: *mut u32,
     ) -> i32;
 }
+
 
 static LAST_APP: Mutex<String> = Mutex::new(String::new());
 
@@ -126,6 +131,7 @@ pub fn get_last_app_name() -> Option<String> {
     None
 }
 
+#[cfg(windows)]
 pub fn get_frontmost_app_name() -> Option<String> {
     unsafe {
         let hwnd = GetForegroundWindow();
@@ -168,3 +174,38 @@ pub fn get_frontmost_app_name() -> Option<String> {
         get_last_app_name()
     }
 }
+
+/// Bundle identifier of the frontmost application (NSWorkspace), ignoring Minkey itself
+#[cfg(target_os = "macos")]
+pub fn get_frontmost_app_name() -> Option<String> {
+    use objc2_app_kit::NSWorkspace;
+
+    let id = objc2::rc::autoreleasepool(|_| {
+        let app = NSWorkspace::sharedWorkspace().frontmostApplication()?;
+        app.bundleIdentifier()
+            .or_else(|| app.localizedName())
+            .map(|s| s.to_string())
+    });
+
+    match id {
+        Some(id)
+            if !id.is_empty()
+                && id != crate::MINKEY_BUNDLE_ID
+                && !id.eq_ignore_ascii_case("minkey") =>
+        {
+            if let Ok(mut last) = LAST_APP.lock() {
+                if *last != id {
+                    *last = id.clone();
+                }
+            }
+            Some(id)
+        }
+        _ => get_last_app_name(),
+    }
+}
+
+#[cfg(not(any(windows, target_os = "macos")))]
+pub fn get_frontmost_app_name() -> Option<String> {
+    get_last_app_name()
+}
+

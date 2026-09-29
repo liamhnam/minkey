@@ -1,3 +1,5 @@
 /target
 *.log
 *.png
+/Minkey.app
+.DS_Store

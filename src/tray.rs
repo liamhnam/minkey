@@ -1,22 +1,34 @@
 // System Tray Service for Minkey
 // Ported from OpenKey SystemTrayHelper.cpp
 
+#[cfg(windows)]
 use std::sync::atomic::{AtomicBool, Ordering};
+#[cfg(windows)]
 use std::sync::{Arc, Mutex};
+#[cfg(windows)]
 use std::thread;
 
+#[cfg(windows)]
 use windows_sys::Win32::Foundation::*;
+#[cfg(windows)]
 use windows_sys::Win32::Graphics::Gdi::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::LibraryLoader::GetModuleHandleW;
+#[cfg(windows)]
 use windows_sys::Win32::UI::Shell::*;
+#[cfg(windows)]
 use windows_sys::Win32::UI::WindowsAndMessaging::*;
 
+#[cfg(windows)]
 use crate::hook::HookConfig;
+#[cfg(windows)]
 use crate::types::{CodeTable, InputType};
+#[cfg(windows)]
 use crate::VietnameseEngine;
 
-pub const WM_TRAYMESSAGE: u32 = WM_USER + 1;
+pub const WM_TRAYMESSAGE: u32 = 0x8000 + 1; // WM_USER + 1
 pub const TRAY_ICON_UID: u32 = 100;
+
 
 // Menu Command IDs matching OpenKey
 pub const POPUP_VIET_ON_OFF: u32 = 900;
@@ -50,6 +62,35 @@ pub struct TrayCallbacks {
     pub on_exit: Box<dyn Fn() + Send + Sync>,
 }
 
+#[cfg(windows)]
+pub type PlatformTrayService = TrayService;
+
+#[cfg(not(windows))]
+pub use crate::tray_macos::MacTrayService;
+
+#[cfg(not(windows))]
+pub type PlatformTrayService = MacTrayService;
+
+#[cfg(not(windows))]
+pub type TrayService = MacTrayService;
+
+/// Asks the tray / menu bar icon to redraw after language or icon style changed.
+/// Safe to call from any thread.
+pub fn refresh_tray(tray_hwnd: usize) {
+    #[cfg(windows)]
+    if tray_hwnd != 0 {
+        unsafe {
+            PostMessageW(tray_hwnd as HWND, WM_USER + 2026, 0, 0);
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = tray_hwnd;
+        crate::tray_macos::request_refresh();
+    }
+}
+
+#[cfg(windows)]
 pub struct TrayService {
     config: HookConfig,
     engine: Arc<Mutex<VietnameseEngine>>,
@@ -58,8 +99,10 @@ pub struct TrayService {
     hwnd: usize,
 }
 
+#[cfg(windows)]
 static mut GLOBAL_TRAY: *mut TrayContext = std::ptr::null_mut();
 
+#[cfg(windows)]
 struct TrayContext {
     config: HookConfig,
     engine: Arc<Mutex<VietnameseEngine>>,
@@ -72,7 +115,9 @@ struct TrayContext {
     use_gray_icon: Arc<AtomicBool>,
 }
 
+#[cfg(windows)]
 impl TrayService {
+
     pub fn new(
         config: HookConfig,
         engine: Arc<Mutex<VietnameseEngine>>,
@@ -199,6 +244,7 @@ impl TrayService {
 }
 
 // Window procedure for tray message-handling window
+#[cfg(windows)]
 unsafe extern "system" fn tray_wnd_proc(hwnd: HWND, msg: u32, w_param: WPARAM, l_param: LPARAM) -> LRESULT {
     unsafe {
         if !GLOBAL_TRAY.is_null() {
@@ -251,6 +297,7 @@ unsafe extern "system" fn tray_wnd_proc(hwnd: HWND, msg: u32, w_param: WPARAM, l
     }
 }
 
+#[cfg(windows)]
 unsafe fn show_tray_menu(ctx: &mut TrayContext) {
     unsafe {
         let mut pt: POINT = std::mem::zeroed();
@@ -395,6 +442,7 @@ unsafe fn show_tray_menu(ctx: &mut TrayContext) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn update_tray_data(ctx: &mut TrayContext) {
     unsafe {
         let is_viet = ctx.config.language.load(Ordering::Relaxed) != 0;
@@ -410,6 +458,7 @@ unsafe fn update_tray_data(ctx: &mut TrayContext) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn create_tray_popup_menu() -> (HMENU, HMENU) {
     unsafe {
         let popup = CreatePopupMenu();
@@ -448,6 +497,7 @@ unsafe fn create_tray_popup_menu() -> (HMENU, HMENU) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn append_menu_item(hmenu: HMENU, flags: u32, id: u32, text: &str) {
     unsafe {
         let w = wide_str(text);
@@ -455,6 +505,7 @@ unsafe fn append_menu_item(hmenu: HMENU, flags: u32, id: u32, text: &str) {
     }
 }
 
+#[cfg(windows)]
 unsafe fn check_menu_item(hmenu: HMENU, id: u32, checked: bool) {
     unsafe {
         CheckMenuItem(
@@ -466,6 +517,7 @@ unsafe fn check_menu_item(hmenu: HMENU, id: u32, checked: bool) {
 }
 
 // Generate modern V / E icon dynamically in memory using GDI
+#[cfg(windows)]
 unsafe fn create_tray_icon(is_vietnamese: bool, is_gray: bool) -> HICON {
     unsafe {
         let size: i32 = 32;
@@ -549,10 +601,12 @@ unsafe fn create_tray_icon(is_vietnamese: bool, is_gray: bool) -> HICON {
     }
 }
 
+#[cfg(windows)]
 fn wide_str(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
 }
 
+#[cfg(windows)]
 fn copy_tip(dest: &mut [u16; 128], s: &str) {
     let w = wide_str(s);
     let len = w.len().min(127);

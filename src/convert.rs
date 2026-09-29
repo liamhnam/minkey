@@ -1,23 +1,30 @@
 // Encoding & Text Conversion Tool
 // Ported 1:1 from OpenKey ConvertTool.cpp & OpenKeyHelper.cpp
 
+#[cfg(windows)]
 use std::sync::LazyLock;
+#[cfg(windows)]
 use windows_sys::Win32::System::DataExchange::*;
+#[cfg(windows)]
 use windows_sys::Win32::System::Memory::*;
 
 use crate::tables::*;
 
+#[cfg(windows)]
 pub const CF_UNICODETEXT: u32 = 13;
 
+#[cfg(windows)]
 pub static CF_HTML: LazyLock<u32> = LazyLock::new(|| unsafe {
     let name: Vec<u16> = "HTML Format\0".encode_utf16().collect();
     RegisterClipboardFormatW(name.as_ptr())
 });
 
+#[cfg(windows)]
 pub static CF_RTF: LazyLock<u32> = LazyLock::new(|| unsafe {
     let name: Vec<u16> = "Rich Text Format\0".encode_utf16().collect();
     RegisterClipboardFormatW(name.as_ptr())
 });
+
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConvertOptions {
@@ -278,7 +285,9 @@ fn emit_target(
 }
 
 // Convert contents in Windows Clipboard (CF_UNICODETEXT, CF_HTML, CF_RTF)
+#[cfg(windows)]
 pub fn quick_convert_clipboard(opts: &ConvertOptions) -> bool {
+
     unsafe {
         if OpenClipboard(std::ptr::null_mut()) == 0 {
             return false;
@@ -401,3 +410,35 @@ pub fn quick_convert_clipboard(opts: &ConvertOptions) -> bool {
         true
     }
 }
+
+// Convert contents in macOS / Unix Clipboard using native pbpaste and pbcopy
+#[cfg(not(windows))]
+pub fn quick_convert_clipboard(opts: &ConvertOptions) -> bool {
+    use std::io::Write;
+    use std::process::{Command, Stdio};
+
+    let Ok(output) = Command::new("pbpaste").output() else {
+        return false;
+    };
+    let Ok(text) = String::from_utf8(output.stdout) else {
+        return false;
+    };
+    if text.is_empty() {
+        return false;
+    }
+
+    let converted = convert_util(&text, opts);
+
+    let Ok(mut child) = Command::new("pbcopy")
+        .stdin(Stdio::piped())
+        .spawn() else {
+        return false;
+    };
+
+    if let Some(mut stdin) = child.stdin.take() {
+        let _ = stdin.write_all(converted.as_bytes());
+    }
+    let _ = child.wait();
+    true
+}
+

@@ -142,6 +142,7 @@ pub static CONSONANT_D: LazyLock<Vec<Vec<u16>>> = LazyLock::new(|| {
         vec![KEY_D, KEY_I, KEY_E, KEY_M],
         vec![KEY_D, KEY_I, KEY_E, KEY_P],
         vec![KEY_D, KEY_I, KEY_T],
+        vec![KEY_D, KEY_I, KEY_U], // "điu": missing in OpenKey, VNI "diu9" stayed "diu9"
 
         vec![KEY_D, KEY_O],
         vec![KEY_D, KEY_O, KEY_A],
@@ -439,7 +440,7 @@ pub static CODE_TABLES: LazyLock<[HashMap<u32, Vec<u16>>; 5]> = LazyLock::new(||
     t2.insert((KEY_A as u32) | TONEW_MASK, vec![0xC941, 0xE961, 0xC841, 0xE861, 0xDA41, 0xFA61, 0xDC41, 0xFC61, 0xCB41, 0xEB61]);
     t2.insert((KEY_O as u32) | TONE_MASK, vec![0xC14F, 0xE16F, 0xC04F, 0xE06F, 0xC54F, 0xE56F, 0xC34F, 0xE36F, 0xC44F, 0xE46F]);
     t2.insert((KEY_O as u32) | TONEW_MASK, vec![0xD9D4, 0xF9F4, 0xD8D4, 0xF8F4, 0xDBD4, 0xFBF4, 0xD5D4, 0xF5F4, 0xCFD4, 0xEFF4]);
-    t2.insert((KEY_U as u32) | TONEW_MASK, vec![0xD9D6, 0xF9F6, 0xD8D6, 0xF8D6, 0xDBD6, 0xFBF6, 0xD5D6, 0xF5F6, 0xCFD6, 0xEFF6]);
+    t2.insert((KEY_U as u32) | TONEW_MASK, vec![0xD9D6, 0xF9F6, 0xD8D6, 0xF8F6, 0xDBD6, 0xFBF6, 0xD5D6, 0xF5F6, 0xCFD6, 0xEFF6]);
     t2.insert((KEY_E as u32) | TONE_MASK, vec![0xC145, 0xE165, 0xC045, 0xE065, 0xC545, 0xE565, 0xC345, 0xE365, 0xC445, 0xE465]);
     t2.insert(KEY_I as u32, vec![0x00CD, 0x00ED, 0x00CC, 0x00EC, 0x00C6, 0x00E6, 0x00D3, 0x00F3, 0x00D2, 0x00F2]);
     t2.insert(KEY_Y as u32, vec![0xD959, 0xF979, 0xD859, 0xF879, 0xDB59, 0xFB79, 0xD559, 0xF579, 0x00CE, 0x00EE]);
@@ -534,6 +535,14 @@ pub fn key_code_to_character(key_code: u32) -> u16 {
     } else {
         0
     }
+}
+
+/// Macro text that is neither a key nor a Vietnamese letter is stored as `code point | PURE_CHARACTER_MASK`
+pub fn pure_character(data: u32) -> Option<char> {
+    if (data & PURE_CHARACTER_MASK) == 0 {
+        return None;
+    }
+    char::from_u32(data & !PURE_CHARACTER_MASK)
 }
 
 pub fn get_character_code(data: u32, code_table: usize) -> u32 {

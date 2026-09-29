@@ -453,9 +453,14 @@ pub fn register_run_on_startup(enable: bool, run_as_admin: bool) {
 
     if enable {
         if run_as_admin {
-            let cmd = format!("schtasks /create /sc onlogon /tn Minkey /rl highest /tr \"{}\" /f", exe_path);
-            let _ = std::process::Command::new("cmd")
-                .args(["/C", &cmd])
+            // Call schtasks directly: through `cmd /C` the quotes around a path with spaces got
+            // escaped as \" and schtasks rejected the command, so no start-up task was created.
+            // /tr needs its own quotes so a path with spaces stays one program path.
+            use std::os::windows::process::CommandExt;
+            let _ = std::process::Command::new("schtasks")
+                .args(["/create", "/sc", "onlogon", "/tn", "Minkey", "/rl", "highest", "/f"])
+                .args(["/tr", &format!("\"{exe_path}\"")])
+                .creation_flags(0x08000000) // CREATE_NO_WINDOW
                 .status();
         } else {
             unsafe {
@@ -486,8 +491,10 @@ pub fn register_run_on_startup(enable: bool, run_as_admin: bool) {
                 RegCloseKey(h_key);
             }
         }
+        use std::os::windows::process::CommandExt;
         let _ = std::process::Command::new("schtasks")
             .args(["/delete", "/tn", "Minkey", "/f"])
+            .creation_flags(0x08000000) // CREATE_NO_WINDOW
             .status();
     }
 }

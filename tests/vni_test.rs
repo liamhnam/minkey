@@ -89,3 +89,11 @@ fn test_vni_sentence() {
     let res = engine.type_string("To6i la2 ngu7o72i Vie6t5 Nam.");
     assert_eq!(res, "Tôi là người Việt Nam.");
 }
+
+#[test]
+fn test_vni_dieu_with_u_final() {
+    // "điu" was missing from the đ table: "diu9" stayed "diu9"
+    let mut engine = VietnameseEngine::new();
+    engine.input_type = minkey::InputType::Vni;
+    assert_eq!(engine.type_string("diu91 "), "đíu ");
+}

@@ -56,7 +56,18 @@ pub fn confirm(title: &str, text: &str) -> bool {
 /// Opens a URL with the system default browser
 pub fn open_url(url: &str) {
     #[cfg(windows)]
-    let _ = std::process::Command::new("cmd").args(["/C", "start", url]).status();
+    unsafe {
+        use windows_sys::Win32::UI::Shell::ShellExecuteW;
+        use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+        ShellExecuteW(
+            std::ptr::null_mut(),
+            wide("open").as_ptr(),
+            wide(url).as_ptr(),
+            std::ptr::null(),
+            std::ptr::null(),
+            SW_SHOWNORMAL,
+        );
+    }
     #[cfg(target_os = "macos")]
     let _ = std::process::Command::new("open").arg(url).status();
 }

@@ -166,3 +166,27 @@ fn test_capitalised_thuo() {
     let mut engine = VietnameseEngine::new();
     assert_eq!(engine.type_string("Thuowr"), "Thuở");
 }
+
+#[test]
+fn test_uo_w_without_final_is_u_o_horn() {
+    // "uo" + w ending the word: only "o" gets the horn (huơ tay, khuơ), OpenKey gave "hươ"
+    for (keys, want) in [("huow ", "huơ "), ("khuow ", "khuơ "), ("huowf ", "huờ "), ("quow ", "quơ ")] {
+        assert_eq!(VietnameseEngine::new().type_string(keys), want, "keys {keys:?}");
+    }
+    // A final, i or u typed afterwards makes it "ươ", whatever the order of w and the tone
+    for (keys, want) in [
+        ("huowng ", "hương "), ("dduowcj ", "được "), ("nguowif ", "người "), ("huowu ", "hươu "),
+        ("ruowuj ", "rượu "), ("buowus ", "bướu "), ("tuowrng ", "tưởng "), ("thuowr ", "thuở "),
+        ("dduowngf ", "đường "), ("muowngj ", "mượng "),
+    ] {
+        assert_eq!(VietnameseEngine::new().type_string(keys), want, "keys {keys:?}");
+    }
+}
+
+#[test]
+fn test_second_w_undoes_u_o_horn() {
+    // Double w undoes the horn for "uơ" just like for "ươ"
+    assert_eq!(VietnameseEngine::new().type_string("huoww"), "huow");
+    assert_eq!(VietnameseEngine::new().type_string("thuoww"), "thuow");
+    assert_eq!(VietnameseEngine::new().type_string("huongww"), "huongw");
+}

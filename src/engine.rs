@@ -744,7 +744,11 @@ impl VietnameseEngine {
 
             if (((self.typing_word[vsi] & TONEW_MASK) != 0) && ((self.typing_word[vsi + 1] & TONEW_MASK) != 0))
                 || (((self.typing_word[vsi] & TONEW_MASK) != 0) && self.chr(vsi + 1) == KEY_I)
-                || (((self.typing_word[vsi] & TONEW_MASK) != 0) && self.chr(vsi + 1) == KEY_A) {
+                || (((self.typing_word[vsi] & TONEW_MASK) != 0) && self.chr(vsi + 1) == KEY_A)
+                // "uơ" (quơ, thuở, huơ): a second w undoes it too; OpenKey only knew "ươ" here
+                || (self.chr(vsi) == KEY_U && self.chr(vsi + 1) == KEY_O
+                    && (self.typing_word[vsi] & TONEW_MASK) == 0
+                    && (self.typing_word[vsi + 1] & TONEW_MASK) != 0) {
                 self.hook_state.code = HookCodeState::Restore;
                 for ii in vsi..self.index {
                     self.typing_word[ii] &= !TONEW_MASK;
@@ -759,7 +763,9 @@ impl VietnameseEngine {
                         if vsi + 2 < self.index && self.chr(vsi + 2) == KEY_N {
                             self.typing_word[vsi] |= TONEW_MASK;
                         }
-                    } else if vsi >= 1 && self.chr(vsi - 1) == KEY_Q {
+                    } else if (vsi >= 1 && self.chr(vsi - 1) == KEY_Q) || vsi + 2 == self.index {
+                        // "quơ", and "uo" ending the word: "huơ", "khuơ" (OpenKey gave "hươ").
+                        // Typing a final or i / u later turns it into "ươ" in check_grammar.
                         self.typing_word[vsi + 1] |= TONEW_MASK;
                     } else {
                         self.typing_word[vsi] |= TONEW_MASK;
@@ -892,11 +898,11 @@ impl VietnameseEngine {
 
         let mut is_checked_grammar = false;
 
-        // "thuơn", "ưoi", "ưom", "ưoc"
+        // "thuơn", "ưoi", "ưom", "ưoc", "huơu" -> "ươ"; G for the quick end consonant "g" -> "ng"
         if self.index >= 3 {
             for i in (0..self.index).rev() {
                 let c = self.chr(i);
-                if matches!(c, KEY_N | KEY_C | KEY_I | KEY_M | KEY_P | KEY_T) {
+                if matches!(c, KEY_N | KEY_C | KEY_I | KEY_M | KEY_P | KEY_T | KEY_U | KEY_G) {
                     if i >= 2 && self.chr(i - 1) == KEY_O && self.chr(i - 2) == KEY_U {
                         let w1 = self.typing_word[i - 1] & TONEW_MASK;
                         let w2 = self.typing_word[i - 2] & TONEW_MASK;
@@ -1318,8 +1324,15 @@ impl VietnameseEngine {
         if let Ok(table) = self.macro_table.lock() {
             if let Some(replacement) = table.lookup(&word, self.auto_caps_macro) {
                 let macro_codes = crate::macro_engine::string_to_macro_key_codes(&replacement, self.code_table);
+                // Erase what is on screen, not the keys typed: "aa" shows as the single letter "â".
+                // English mode never fills the typing buffer, so there the keys are what is shown.
+                let shown = if self.index > 0 {
+                    self.long_word_helper.len() + self.index
+                } else {
+                    self.macro_key.len()
+                };
                 self.hook_state.code = HookCodeState::ReplaceMacro;
-                self.hook_state.backspace_count = self.macro_key.len() as u8;
+                self.hook_state.backspace_count = shown.min(u8::MAX as usize) as u8;
                 self.hook_state.macro_data = macro_codes;
                 self.has_handled_macro = true;
                 self.macro_key.clear();
@@ -1689,7 +1702,9 @@ impl VietnameseEngine {
                         output.pop();
                     }
                     for &m_code in state.macro_data.iter() {
-                        let c = if (m_code & CHAR_CODE_MASK) != 0 {
+                        let c = if let Some(pure) = pure_character(m_code) {
+                            pure
+                        } else if (m_code & CHAR_CODE_MASK) != 0 {
                             char::from_u32(m_code & 0xFFFF).unwrap_or('?')
                         } else {
                             let ch_out = key_code_to_character(m_code);

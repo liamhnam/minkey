@@ -119,3 +119,12 @@ fn test_remove_mark_with_all_caps() {
     opts.to_all_caps = true;
     assert_eq!(convert_util(input, &opts), "TIENG VIET");
 }
+
+#[test]
+fn test_vni_lowercase_u_horn_grave() {
+    // VNI Windows "ừ" is "ö" (ư) + "ø" (huyền); the capital "Ö" must not leak into the lowercase form
+    let vni = convert_util("ừ Ừ", &ConvertOptions { from_code: 0, to_code: 2, ..Default::default() });
+    assert_eq!(vni, "\u{F6}\u{F8} \u{D6}\u{D8}");
+    let back = convert_util(&vni, &ConvertOptions { from_code: 2, to_code: 0, ..Default::default() });
+    assert_eq!(back, "ừ Ừ");
+}

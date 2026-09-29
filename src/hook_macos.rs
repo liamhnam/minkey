@@ -389,8 +389,10 @@ impl MacHookContext {
 
     /// Converts one engine output value into UTF-16 code units, tracking lengths for 2-byte code tables
     fn encode_char(&mut self, data: u32, code_table: usize, out: &mut Vec<u16>) {
-        if (data & PURE_CHARACTER_MASK) != 0 {
-            out.push(data as u16);
+        if let Some(ch) = crate::tables::pure_character(data) {
+            // Code points above U+FFFF (emoji...) need a surrogate pair
+            let mut buf = [0u16; 2];
+            out.extend_from_slice(ch.encode_utf16(&mut buf));
             if is_double_code(code_table) {
                 self.sync_key.push(1);
             }

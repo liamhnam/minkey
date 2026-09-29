@@ -1,0 +1,262 @@
+# Rows of openkey_parity.tsv where Minkey intentionally differs from OpenKey: "<cfg>|<keys>	<Minkey output>".
+# - "uo" + w ending the word gives "uơ" (huơ, khuơ), not OpenKey's "ươ"; a later final or i / u / g
+#   (incl. the quick end consonant g -> ng) turns it into "ươ" (hươu, bướu).
+# - A second w undoes "uơ" as it undoes "ươ" (OpenKey could not undo thuơ / quơ).
+# - "điu" is a valid syllable (VNI diu9 -> điu), missing from OpenKey's table.
+0 0 0 0 0 0 1 0 0|vaya giuorw cheose doicho	vây giuở cheóe doicho
+0 0 0 0 0 0 1 0 0|duachdx Racwj baunhaf layyar tuowf quaya	duachdx Rặc baunhà lảyya tuờ quây
+0 0 0 0 0 0 1 0 0|duunhws phuowr ghoiiwf gheuyre nuayf	duunhws phuở ghoiiwf ghẻuye nuày
+0 0 0 0 0 0 1 0 0|riuo huowj CHAIYs	riuo huợ CHAÍY
+0 0 0 0 0 0 1 0 0|guoojw	guợ
+0 0 0 0 0 0 1 0 0|nghyeuce phuowj buoitwwr thoangwx THAUCf	nghyeuce phuợ buoitwwr thoẵng THAUCf
+0 0 0 0 0 0 1 0 0|buows nuyas	buớ nuýa
+0 0 0 0 0 0 1 0 0|huoorw kuyapf cuochor nayj phoayx	huở kuỳap cuochỏ nạy phoãy
+0 0 0 0 0 0 1 0 0|necxe ngaychas Chuoowr raychar	necxe ngaychá Chuở raychả
+0 0 0 0 0 0 1 0 0|phuosw uoxw Gangws daynar nhoainr	phuớ uỡ Gắng daynả nhoảin
+0 0 0 0 0 0 1 0 0|biur quiatx thuouws geour	bỉu quiatx thướu geỏu
+0 0 0 1 1 0 1 1 0|sou DUOjw nghayiaj maoij khonhwx	sou DUỢ nghạyia maọi khonhwx
+0 0 0 1 1 0 1 1 0|lepej cieutes thuouw Tanhr	lệp cieuté thươu Tảnh
+0 0 0 1 1 0 1 1 0|kuowx kaumx troanr dieunhfde	kuỡ kãum troản dieunhfde
+0 0 0 1 1 0 1 1 0|puoichwwr daunhsa phuoowr guauws	puoichwwr daunhsa phuở gưáu
+0 0 0 1 1 0 1 1 0|ghuauwx xueuje nhauyar giochsw duoxw	ghưãu xuệu nhảuya giochsw duỡ
+0 0 0 1 1 0 1 1 0|Luayta quiaoj thuosww neocr gias khechs	Luayta quiạo thuosw neocr giá khéch
+0 0 0 1 1 0 1 1 0|tranhar RUOwx xiayj queuies bauuax	tranhả RUỠ xiạy quéuie bãuua
+0 0 0 1 1 0 1 1 0|cieue dachdax luowj gheoch giuiof baongs	ciêu đachã luợ gheoch giuìo báong
+0 0 0 1 1 0 1 1 0|xuows cietxe tauf	xuớ cietxe tàu
+0 0 1 0 0 0 0 1 0|goitwf thuotws khaiar Luowf xuiuxw	goitwf thướt khaỉa Luờ xưĩu
+0 0 1 0 0 0 0 1 0|goens vuoxw duoiyjdww	goén vuỡ duoiyjdww
+0 0 1 0 0 0 0 1 0|ruiof ngyeumer loarw BIEUNrE chuows	ruìo ngyeumer loẳ BIẺUNE chuớ
+0 0 1 0 0 0 0 1 0|Geopr utfw nhuoowr	Gẻop utfw nhuở
+0 0 1 1 1 0 1 0 0|muyemre ghuow	muyểm ghuơ
+0 0 1 1 1 0 1 0 0|duodw vangws khoetr Cuuchws deuef	đuơ vắng khoetr Cuuchws dều
+0 0 1 1 1 0 1 0 0|Eis Buatar raii giyeoej doachdw thuoungjww	Eis Buatar raii giyeoej doachdw thuọungw
+0 0 1 1 1 0 1 0 0|nuoows Theom cuotxw nghyyx ngyox uoicxo	nuớ Theom cuotxw nghyyx ngyox uoicxo
+0 0 1 1 1 0 1 0 0|ceomf vieumer Sayma roits khayo khuowr	ceomf vieumer Sayma roits khayo khuở
+0 0 1 1 1 0 1 0 0|gioaimr nghuowr byeunhe ipj Haow dianhj	gioaimr nghuở byeunhe ịp Haow dịanh
+0 0 1 1 1 0 1 0 0|maiwr quaiuf xuonhww kaiyj thiunhj nhuoowx	maiwr quaiuf xuonhww kaiyj thiunhj nhuỡ
+0 0 1 1 1 0 1 0 0|siengef guowf Quoiywj paongs quieuie	siềng guờ Quoiywj paongs quieuie
+0 0 1 1 1 0 1 0 0|nuorw ngharw huenge Quych	nuở nghẳ huêng Quych
+0 0 1 1 1 0 1 0 0|quungw nhiunhf dyeuoef toyws Canhf kuow	quungw nhiunhf dyeuoef toyws Cành kuơ
+0 0 1 1 1 0 1 0 0|chuorw Biacj cyeute Trayoax noiixo Cheoif	chuở Biacj cyeute Trayoax noiixo Cheòi
+0 0 1 1 1 0 1 0 0|guowf NHUING buouywws Tuyayj ngaoj	guờ NHUING buouywws Tuyayj ngạo
+0 0 1 1 1 0 1 0 0|ruitwr boich nuanhws xoaiw nhoep phuoowr	ruitwr boich nuanhws xoaiw nhoep phuở
+0 0 1 1 1 0 1 0 0|vuorw puopwj keox ruchr gioayof	vuở pượp kẽo ruchr gioayof
+0 0 1 1 1 0 1 0 0|Giuows thiunf Cuyngr Tuonxo	Giuớ thiunf Cuyngr Tuỗn
+0 0 1 1 1 0 1 0 0|xieter Nguoofw queunef phoapwr	xieter Nguờ queunef phoẳp
+0 1 0 0 0 0 0 1 0|quuowf	quuờ
+0 1 0 0 0 0 0 1 0|thuoofww troanrw banhj kai soaitr DuchDs	thuòw troẳn bạnh kai soaitr DuchDs
+0 1 0 0 0 0 0 1 0|huoichof Duyis Luaufa tieyej truotsww chuosw	huoichò Duyí Luâù tịêy truótw chuớ
+0 1 0 0 0 0 0 1 0|khuoosw ghuomwj maowr quaypa	khuớ ghượm maowr quaypa
+0 1 0 0 0 0 0 1 0|xuowf truoujww	xuờ truọuw
+0 1 0 0 0 0 0 1 0|duodwf	đuờ
+0 1 0 0 0 0 0 1 0|suoow	suơ
+0 1 0 0 0 0 0 1 0|ghuoowr moamr ghuyos ceumex	ghuở moảm ghuyó ceumẽ
+0 1 0 1 0 0 1 1 0|hoetr khiuo siuoj nuoow	hoetr khiuo siụo nuơ
+0 1 0 1 0 0 1 1 0|donhox truowx nuomwwf goaps Tings nuonwwx	donhõ truỡ nuomwf goáp Tings nuonwx
+0 1 0 1 0 0 1 1 0|chuyis phuoowr ghaor troiyrw	chuyí phuở ghảo trỏiyw
+0 1 0 1 0 0 1 1 0|ruams phuoowf nuapaj deudej soichwr	ruám phuờ nuập đệu soichwr
+0 1 0 1 0 0 1 1 0|duichs nghuoows Moip	dúich nghuớ Moip
+0 1 0 1 0 0 1 1 0|Guoowx phuana Ghenhef	Guỡ phuân Ghềnh
+0 1 0 1 0 0 1 1 0|diayr Nhoangj buowr kuapwx	dỉay Nhoạng buở kữap
+0 1 0 1 0 0 1 1 0|puoojw	puợ
+0 1 1 0 1 1 0 0 0|neumfe Loicrw kuowr thuuw	nèume Loicrw kuở thưu
+0 1 1 0 1 1 0 0 0|diufd nhuana phuutxw muitwj canhx kieucef	đìu nhuân phuutxw muitwj cãnh kieucef
+0 1 1 0 1 1 0 0 0|ngunhwf troos xuowf	ngunhwf trố xuờ
+0 1 1 0 1 1 0 0 0|tunhwj MUAfw nhuoowf cuanhf nghayngs	tunhwj MỪA nhuờ cuành nghayngs
+0 1 1 1 1 0 1 0 0|traiuj khuoow nghaytja koimfo NUOPsO Quoimjw	traiuj khuơ nghaytja koimfo NUỐP Quọimw
+0 1 1 1 1 0 1 0 0|nhotf CHUOITOx poujw chuomww riecef nguooxw	nhotf CHUOITOx poujw chuomw riecef nguỡ
+0 1 1 1 1 0 1 0 0|giuaymax vuius puow	giuaymax vuius puơ
+0 1 1 1 1 0 1 0 0|troitos giechje khuycf giuoojw ngoijw	troitos giệch khuycf giuợ ngợi
+0 1 1 1 1 0 1 0 0|huoows siutj pyos	huớ siutj pýo
+0 1 1 1 1 0 1 0 0|ruoxw meoi	ruỡ meoi
+0 1 1 1 1 0 1 0 0|Phaoaj giuayngaj baoi xuowj	Phaoaj giuayngaj baoi xuợ
+0 1 1 1 1 0 1 0 0|thaoyx DuoDwj giuchs vyeies BENGs	thaoyx Đuợ giuchs vyeies BÉNG
+0 1 1 1 1 0 1 0 0|troingos Xaias ghuowj	troingos Xaias ghuợ
+0 1 1 1 1 0 1 0 0|xiengfe laiuj nguoow kyeixe pomf doaimsd	xiềng laiuj nguơ kyeixe pòm doáimd
+0 1 1 1 1 0 1 0 0|thoicos guojw	thoicos guợ
+0 1 1 1 1 0 1 0 0|ghayngaj Kuows duoingrdo Toangwr Oayof Chyeumxe	ghayngaj Kuớ duoingrdo Toẳng Oayof Chyẽume
+0 1 1 1 1 0 1 0 0|suow giyeunger luoito	suơ giyeunger luoito
+0 1 1 1 1 0 1 0 0|khoingf MUUf xaioj quuoows geoes	khoingf MUUf xaioj quuớ geóe
+0 1 1 1 1 0 1 0 0|luomo tuingj Quaia chaios PUOwf	luôm tuingj Quaia chaios PUỜ
+1 0 0 0 0 0 1 1 0|doain94 Vuo7 COAI	doain94 Vuơ COAI
+1 0 0 0 0 0 1 1 0|Koai4 thuouu775	Koãi thuouu75
+1 0 0 0 0 0 1 1 0|suuch75 Roayu4 uu72 vec63 khuo72	suuch75 Rõayu ừu vêc3 khuờ
+1 0 0 0 0 0 1 1 0|khuo72 muyao1 KHAUU4 chuyi3	khuờ múyao KHAŨU chuỷi
+1 0 0 0 0 0 1 1 0|giuop74 voit1 luyi2 phuo74 roanh1	giưỡp vóit luỳi phuỡ roánh
+1 0 0 0 0 0 1 1 0|UOII64 thuouc771	UOII64 thuouc71
+1 0 0 0 0 0 1 1 0|bang82 chop71 nhuo71 vui7 Quyeu6 muuu7	bằng chớp nhuớ vưi Quyêu muuu7
+1 0 0 1 0 1 1 0 0|Diu95 nguuch74 choang1	Địu nguuch74 choáng
+1 0 0 1 0 1 1 0 0|bich3 giuo74 suach63 thyeup6	bich3 giuỡ suach63 thyeup6
+1 0 0 1 0 1 1 0 0|khie6 nhou3 xuo7	khiê nhỏu xuơ
+1 0 0 1 0 1 1 0 0|QUAIM5 nguo75 coii73 na82 soic64 Khuung71	QUẠIM nguợ coii73 nằ soic64 Khuung71
+1 0 1 0 1 0 1 1 0|Phuoc65 deop5 Ninh2 quuo72 piuu4	Phuộc dẹop Nình quuờ piũu
+1 0 1 0 1 0 1 1 0|dyeunh63 xuo72 Riep65 muich75 duac62	dyeunh63 xuờ Riệp muich75 duâc2
+1 0 1 0 1 0 1 1 0|Ghai6 nhyeuc62 ngyi Ruo75 ghit4	Ghai6 nhyeuc62 ngyi Ruợ ghit4
+1 0 1 0 1 0 1 1 0|giuai64 vuonh774 Guo72 pheung64 nguoin772 giia	giuai64 vuonh774 Guờ pheung64 nguoin772 giia
+1 0 1 0 1 0 1 1 0|ngych4 hai63 kuo71 caim1 BEONH2 ruoim771	ngych4 hai63 kuớ cáim BEONH2 ruoim771
+1 0 1 0 1 0 1 1 0|phiei64 roayt4 khie62 nhiui tryey63 kuo7	phiei64 roayt4 khiề nhiui tryểy kuơ
+1 0 1 0 1 0 1 1 0|nhoach5 nguoch773 cheoy luo75 he6	nhoạch nguoch773 cheoy luợ hê
+1 0 1 0 1 0 1 1 0|chaip3 Puiy2 truayt63 suo74 thoayy	chảip Puìy truayt63 suỡ thoayy
+1 0 1 0 1 0 1 1 0|Nghoey4 nguo73 nenh61	Nghoẽy nguở nếnh
+1 0 1 0 1 0 1 1 0|giuao74 tuyc ruo73	giưão tuyc ruở
+1 0 1 1 0 0 0 1 0|tuo75	tuợ
+1 0 1 1 0 0 0 1 0|Nghaut3 soch75 thuang61 noai1 Khiui4 cuo75	Nghaut3 soch75 thuấng noái Khiui4 cuợ
+1 0 1 1 0 0 0 1 0|boiu2 taic4 Ruo75 roaiu2	boiu2 taic4 Ruợ roaiu2
+1 0 1 1 0 0 0 1 0|guo75 tim5 chuayy61 nain1 giuic1 nhuun7	guợ tịm chuayy61 nain1 giuic1 nhuun7
+1 0 1 1 0 0 0 1 0|guaym61 Luou773 Diu91	guaym61 Luou73 Đíu
+1 0 1 1 0 0 0 1 0|cuo74 nghep2 kheo1	cuỡ nghèp khéo
+1 0 1 1 0 0 0 1 0|uau3 chat thuou72 voing61	uau3 chat thườu voing61
+1 1 0 0 1 0 0 0 0|diu93 nghuaynh6 om61 ngaim2 thuat72	đỉu nghuaynh6 ốm ngàim thưat2
+1 1 0 0 1 0 0 0 0|truy1 DUYP94 thuo774	truý DUYP94 thuo74
+1 1 0 0 1 0 0 0 0|Nup5 nghuey61 truo7	Nụp nghuêý truơ
+1 1 0 0 1 0 0 0 0|ghiao1 xuay65 Muoui77 giuo71 pec4 tuiy75	ghiáo xuậy Muoui7 giuớ pec4 tuiy75
+1 1 0 0 1 0 0 0 0|byem63 nghuyc1 poau83 suan75 nuo7 keunh63	byểm nghuyc1 pooaủ sựan nuơ keunh63
+1 1 0 0 1 0 0 0 0|Ruach4 nong73 rot75 moii4 triay5 Ghuo73	Ruach4 nong73 rợt moii4 trịay Ghuở
+1 1 0 0 1 0 0 0 0|loaim1 gheuch65 GIUIT7 duo974	loáim gheuch65 GIUIT7 đuỡ
+1 1 0 0 1 0 0 0 0|ghuat5 geup62 kheng65 ghuo75 nhayn6 tuoic62	ghuạt geup62 khệng ghuợ nhayn6 tuoic62
+1 1 0 0 1 0 0 0 0|nguit71 Guo73 phiu4 monh64	nguit71 Guở phĩu monh64
+1 1 0 1 1 1 1 0 0|vuo74	vuỡ
+1 1 0 1 1 1 1 0 0|thop63 queut65 Om72 nhiuc4 muo72 roit4	thổp queut65 Ờm nhiuc4 muờ roit4
+1 1 0 1 1 1 1 0 0|ngaic5 nhiuch4 Duo7 nheng5	ngạic nhiuch4 Duơ nhẹng
+1 1 0 1 1 1 1 0 0|saom3 rieng65 nghio2 buouc77 ruou72 cuo7	sảom riệng nghìo buouc7 rườu cuơ
+1 1 1 0 0 0 1 1 0|nuoin772 Rui1 khuo72 ngun72 seoy4	nuoin772 Rúi khuờ ngừn seõy
+1 1 1 0 0 0 1 1 0|nhuo74 giop63 xoinh dayc62	nhuỡ giổp xoinh dayc62
+1 1 1 0 0 0 1 1 0|diut93 nghuo75 ghou6	diut93 nghuợ ghou6
+1 1 1 0 0 0 1 1 0|nguo72 ngoich65 tuon6 Phut73	nguờ ngoich65 tuôn Phưt3
+1 1 1 0 0 0 1 1 0|dup3 NIUC tuo7 ngenh triui5	dủp NIUC tuơ ngenh triụi
+1 1 1 0 0 0 1 1 0|giuo72 phuich74 gieuo62 thuoii62 Thiu4	giuờ phuich74 gieuồ thuoii62 Thĩu
+1 1 1 0 0 0 1 1 0|huo7	huơ
+1 1 1 1 1 1 1 0 0|ghyeup61 guanh65 phoayi1 ngoenh2 truo71 khaonh2	ghyeup61 guanh65 phoayi1 ngoènh truớ khaonh2
+1 1 1 1 1 1 1 0 0|huo71 trui4 suyach5	huớ trũi suỵach
+1 1 1 1 1 1 1 0 0|duoich964 muuu73 duo97 suyn4 rao6 ngiei62	duoich964 muuu73 đuơ suỹn rao6 ngiei62
+1 1 1 1 1 1 1 0 0|that8 giuo72 ngaum5 Nhuo73 Nhuech6	thăt giuờ ngaum5 Nhuở Nhuêch
+2 0 0 0 0 0 1 0 0|khouwj Vocxw kuoowx ghoiojw	khouwj Vocxw kuỡ ghợi
+2 0 0 0 0 0 1 0 0|suooox diach Troinor duoodws uoinhjww neuues	suõo diach Troinỏ đuớ uọinhww néuue
+2 0 0 0 0 0 1 0 0|ngoatf tuoow truayyaj Suoinwwr gauc vaucj	ngoatf tuơ trụayya Suoinwwr gauc vạuc
+2 0 0 0 0 0 1 0 0|thoeuj hioj pauchar tuorw Beocs	thoẹu hịo pauchả tuở Béoc
+2 0 0 0 0 0 1 0 0|phuoiiww vuio thuouowwr nhoains rap	phuoiiww vuio thuouowr nhoáin rap
+2 0 0 0 0 0 1 0 0|ngiunhr Gioiuo guoow muyanhr giueyex dauodr	ngiunhr Gioiuo guơ muỷanh giuễy dauodr
+2 0 0 0 0 0 1 0 0|atax DuoDwj ngiams	âtx Đuợ ngiám
+2 0 0 0 0 0 1 0 0|nguang kuopw nguiux baoy vuoows muoinoj	nguang kươp nguĩu baoy vuớ muoinọ
+2 0 0 0 0 0 1 0 0|kych khuoowf seoux Guonro	kych khuờ seõu Guổn
+2 0 0 0 0 0 1 0 0|ruoicoj Suowr nuoitjww matsw Luoutsww thiux	ruoicọ Suở nuọitww mắt Luóutw thĩu
+2 0 0 0 0 0 1 0 0|ngaichx kueter Puoxw Cecer Nhyeupje doiydof	ngaichx kuêtr Puỡ Cêcr Nhyẹupe doiydò
+2 0 0 0 0 0 1 0 0|giuoowr phayus TUAYrA	giuở phaýu TUẨY
+2 0 0 0 0 0 1 0 0|muow tiaj nhoaioj Phoaycs xatar cyns	muơ tịa nhọaio Phoaycs xâtr cyns
+2 0 0 1 1 1 1 0 0|leungje doenj ruoowf giuayiaj nghoaits	lẹunge doẹn ruờ giụayia nghoáit
+2 0 0 1 1 1 1 0 0|Nhoay nghiats Ngiuur trian duoxw duinhwr	Nhoay nghíat Ngiủu trian duỡ duinhwr
+2 0 0 1 1 1 1 0 0|phoeps Cuuwr Byengxe thuouiwwx	phoép Cửu Byễng thuouiwx
+2 0 0 1 1 1 1 0 0|sumwf nghuows ghoiow gheie laoc pias	sừm nghuớ ghơi gheie laoc pía
+2 0 0 1 1 1 1 0 0|uoows khaour dietex duaypfa toitsw	uớ khaỏu diêtx duaypfa tóitw
+2 0 0 1 1 1 1 0 0|phapwf coingws tuoojw nghuuurw demj	phằp coingws tuợ nghuuurw dẹm
+2 0 0 1 1 1 1 0 0|nhoy nunwx xuoiywwj chauiax kuoojw NUOOO	nhoy nữn xuoiywwj chãuia kuợ NUOO
+2 0 0 1 1 1 1 0 0|phyeuche cuows Nghuaif	phyeuche cuớ Nghuài
+2 0 0 1 1 1 1 0 0|thuoucwwr	thuoucwr
+2 0 0 1 1 1 1 0 0|uow thieuper rongr	uơ thieupẻ rỏng
+2 0 0 1 1 1 1 0 0|kotr Tuacjw camfa geopj guoxw	kotr Tựac cầm gẹop guỡ
+2 0 0 1 1 1 1 0 0|cao thuoww quochjw phaimx	cao thuow quochjw phãim
+2 0 0 1 1 1 1 0 0|Noir Pongf xuow quaupf Nghaius ryeumje	Nỏi Pòng xuơ quàup Nghaíu ryẹume
+2 0 1 0 1 1 1 0 0|thyt diusd phuyeore hieunex	thyt đíu phuyeore hieunex
+2 0 1 0 1 1 1 0 0|lieungfe NHIEUYEf nhaus seonf thuoutwws	lièunge NHIEUYEf nháu sèon thuoutws
+2 0 1 0 1 1 1 0 0|Kauyr hochof kuofw nanf	Kaủy hochof kuờ nàn
+2 0 1 0 1 1 1 0 0|Gheucex Muowf nguyenges thaupsa	Gheucex Muờ nguyếng tháupa
+2 0 1 0 1 1 1 0 0|guayuax kuoow gaumj ceutex duoiifdo piayj	guayuax kuơ gạum ceutex duoiifdo piạy
+2 0 1 0 1 1 1 0 0|laiur koitf Chuayia chiuyj thuouwwj gunhw	laỉu koitf Chuayia chiụy thuouwj gunhw
+2 0 1 0 1 1 1 0 0|thuoitww luomwf tuows layiax suotxw Rangj	thuoitww lườm tuớ layiax suotxw Rạng
+2 0 1 0 1 1 1 0 0|xuyamj guaof luows dyeucdes	xuỵam guào luớ dyeucdes
+2 0 1 0 1 1 1 0 0|hoengs ghuyees nguojw	hoéng ghuyế nguợ
+2 0 1 0 1 1 1 0 0|ropoj XEOMx chuooxw muyechfe khochr Roayij	rộp XẼOM chuỡ muyechfe khochr Roayij
+2 0 1 0 1 1 1 0 0|guyar daowr thuoutjww boanhf	guỷa daowr thuọutw boành
+2 0 1 0 1 1 1 0 0|giuaytfa dyeuoe goitx chyif vuowx vunj	giuaytfa dyeuoe goitx chỳi vuỡ vụn
+2 0 1 0 1 1 1 0 0|laup khuoofw khuyechef thoaip ruotos	laup khuờ khuyêchf thoaip ruốt
+2 0 1 0 1 1 1 0 0|nhuamf suyepe suacsw thyenhxe dyechder uowx	nhuàm suyêp sứac thyễnh dyechder uỡ
+2 0 1 0 1 1 1 0 0|giacxa net Tryeuyes Nghuowf ngocwj xeonj	giacxa net Tryeuyes Nghuờ ngocwj xẹon
+2 0 1 0 1 1 1 0 0|choingsw duadar Truowr guyeie	choingsw đuẩ Truở guyeie
+2 0 1 0 1 1 1 0 0|muowf	muờ
+2 0 1 0 1 1 1 0 0|khuocho thuooww hyetes	khuocho thuow hyết
+2 0 1 0 1 1 1 0 0|Coauj duowx treuner kuoutwws Thonfo khurw	Coạu duỡ treuner kuoutws Thồn khử
+2 0 1 0 1 1 1 0 0|Muouw Aupj khoanhs ruowx BUITfw	Mươu Ạup khoánh ruỡ BUITfw
+2 0 1 1 0 0 1 1 0|phoaynhx quuoiuww duodwf toitor	phoaynhx quuoiuww đuờ toitor
+2 0 1 1 0 0 1 1 0|luowj nguutsw Khaunhf nhuuiwx lytj huayra	luợ nguutsw Khaunhf nhuuiwx lytj huẩy
+2 0 1 1 0 0 1 1 0|giuyamf Nuoows GHOIOwx nghayax nhieuiex Tingf	giuyamf Nuớ GHỠI nghẫy nhieuiex Tingf
+2 0 1 1 0 0 1 1 0|Xuupjw THOINwf Hiuyr ngayngax nghuows doeor	Xuupjw THOINwf Hiuyr ngayngax nghuớ doẻo
+2 0 1 1 0 0 1 1 0|chuapf DuoxDw gayys	chuàp Đuỡ gayys
+2 0 1 1 0 0 1 1 0|vuoofw	vuờ
+2 0 1 1 0 0 1 1 0|Niaux oaicf payoaf baucha xuofw ngyeuie	Niaux oaicf payoaf baucha xuờ ngyeuie
+2 0 1 1 0 0 1 1 0|luyoj tuipj tuoojw veu	luyoj tuipj tuợ veu
+2 0 1 1 0 0 1 1 0|oinws nghuoowr xuas	oinws nghuở xúa
+2 0 1 1 0 0 1 1 0|TRUOfw vuoow	TRUỜ vuơ
+2 1 0 0 1 0 1 0 0|xyemje xaii Geonhs chuoows linhr boechf	xyệm xaii Geonhs chuớ lỉnh boechf
+2 1 0 0 1 0 1 0 0|nueore tuayyar khuowj	nueoẻ tuayyả khuợ
+2 1 0 0 1 0 1 0 0|gaoir thuouwwx deucdex Toy	gaỏi thuouwx deucdẽ Toy
+2 1 0 0 1 0 1 0 0|Truoufo xuoowx truungws cyeyje vauja	Truòuo xuỡ truungws cỵêy vậu
+2 1 0 0 1 0 1 0 0|nghuynj Kaymr tuowr	nghuỵn Kaymr tuở
+2 1 0 0 1 0 1 0 0|Truowf nhuychj	Truờ nhuỵch
+2 1 0 0 1 0 1 0 0|Ditj loayyj chuowj cyee	Dịt loayyj chuợ cyê
+2 1 0 0 1 0 1 0 0|phuoow hongxw Thonhw	phuơ hõngw Thonhw
+2 1 0 0 1 0 1 0 0|huounhwws ghuoowj nhoaychs doais leuyef Tuecef	huounhwws ghuợ nhoaychs doái leuỳe Tuêcf
+2 1 0 0 1 0 1 0 0|nhiamr phuojw taytfa guouwwj Lacs	nhỉam phuợ taytfa guouwj Lác
+2 1 0 0 1 0 1 0 0|ngiats truaynhja Nghuoxw	ngiát truaynhja Nghuỡ
+2 1 0 0 1 0 1 0 0|ghuynhj quuow Luoutwws	ghuỵnh quuơ Luoutws
+2 1 0 1 0 0 1 1 0|miemex troayi Ruows	miễm troayi Ruớ
+2 1 0 1 0 0 1 1 0|ruaowj voer thuouirww kunhr ghuyenge	rưaọ voẻ thuouirw kunhr ghuyêng
+2 1 0 1 0 0 1 1 0|raax vuyeije luosw guyetse	rẫ vuyeiẹ luớ guyết
+2 1 0 1 0 0 1 1 0|uojw doiydwx khot	uợ doiydwx khot
+2 1 0 1 0 0 1 1 0|ruana uapar hienes cuowj nghoior nhyecre	ruân uẩp hiến cuợ nghổi nhyecre
+2 1 0 1 0 0 1 1 0|Voauj ruowr	Voaụ ruở
+2 1 0 1 0 0 1 1 0|thoams synhx Nhyis quuowr KOUwf	thoám synhx Nhýi quuở KOUwf
+2 1 0 1 0 0 1 1 0|giuamwr phuotor duooxdw dauoaf	giửam phuôtr đuỡ dauòa
+2 1 0 1 0 0 1 1 0|gyeuex Suoojw Nhuao thoangs	gyễu Suợ Nhuao thoáng
+2 1 0 1 0 0 1 1 0|siuj doiiwf duocso thuouxww	sịu doiiwf duốc thuõuw
+2 1 0 1 0 0 1 1 0|Vuoipro suowj nghuetex triuchf	Vuỏipo suợ nghuêtx triuchf
+2 1 0 1 0 0 1 1 0|thuunhwx cyoj khuowr duaycxa	thuunhwx cỵo khuở duaycxa
+2 1 0 1 0 0 1 1 0|guofw	guờ
+2 1 0 1 0 0 1 1 0|truows luengex Kuopor giuotfw	truớ luễng Kuổp giuotfw
+2 1 1 0 1 0 0 0 0|Nechej Vuayoax suowr	Nệch Vuayoax suở
+2 1 1 0 1 0 0 0 0|giuoxw	giuỡ
+2 1 1 0 1 0 0 0 0|phuowx Myj vuouoww	phuỡ Mỵ vuouoww
+2 1 1 0 1 0 0 0 0|buauf Tuoows Nguyoj	buaù Tuớ Nguyọ
+2 1 1 0 1 0 0 0 0|thuoufww viauf leuise thechf tryyj	thuòuw viàu leuíe thechf tryyj
+2 1 1 0 1 0 0 0 0|quooo noiwf Phoangj nhauchx truorw NGUICwj	quoo nời Phoạng nhauchx truở NGUICwj
+2 1 1 0 1 0 0 0 0|noanr phuoor Ngoiyos thyeune chuoowx	noản phuổ Ngoiyos thyeune chuỡ
+2 1 1 0 1 0 0 0 0|Vuoxo nghuoicsww kuoow Nguich	Vuỗ nghuóicww kuơ Nguich
+2 1 1 0 1 0 0 0 0|Hyeuce muiyx xuoorw Nghafw truanar phuats	Hyeuce mũiy xuở Nghằ truẩn phuát
+2 1 1 0 1 0 0 0 0|vuoiiwws boius thapar nghauchj Nguowj geuches	vuoiiwws bóiu thẩp nghauchj Nguợ geuches
+2 1 1 0 1 0 0 0 0|xuowx choinw giauchaf chaiu daosd bais	xuỡ choinw giauchaf chaiu đáo bái
+2 1 1 0 1 0 0 0 0|traichr buawr kos cuowx	traichr bửa kó cuỡ
+2 1 1 0 1 0 0 0 0|nghuowf nhochox niacr ruyemes hieue Truyecje	nghuờ nhochox niacr ruyếm hiêu Truyệc
+2 1 1 1 0 1 0 0 0|cuoosw ghuayma	cuớ ghuayma
+2 1 1 1 0 1 0 0 0|puojw Uiu troe Baycf kuai vuutwx	puợ Uiu troe Baycf kuai vuutwx
+2 1 1 1 0 1 0 0 0|xeochs ghuayisa khouwx lau quuowj cocxo	xeochs ghuayisa khouwx lau quuợ cocxo
+2 1 1 1 0 1 0 0 0|uoto noanj Pyeuuex nhuoxw moito	uôt noạn Pyeuuex nhuỡ moito
+2 1 1 1 0 1 0 0 0|truapj ngiuj khuow cangf	truạp ngiụ khuơ càng
+2 1 1 1 0 1 0 0 0|ghuoumjww xoainx nguowr doirdw duoudwr	ghuoumjw xoainx nguở đởi duoudwr
+2 1 1 1 0 1 0 0 0|phaychaj guoowr	phaychaj guở
+2 1 1 1 0 1 0 0 0|nhuyeoe Giuowws Cheunge puoow DOICjDw	nhuyeoe Giuows Cheunge puơ DỌICDw
+1 1 0 0 1 1 1 1 0|uo73	uở
+0 1 0 1 0 0 1 1 0|jF''5uOw@Wi	giF''5ưi
+0 0 0 0 1 0 1 0 0|7657er3xu[g7	7657ẻ3xươg7
+3 0 0 1 1 1 0 1 0|Wogzc	Ươgzc
+0 1 0 0 0 1 0 1 0|wOsxusa/vo ljxyszyD7r	ưỚua/vo ljxyyD7r
+3 0 0 0 1 0 1 0 0|vuoWsr'Exl6@xu	vuở'Ẽlxu
+0 1 1 1 0 0 1 0 0|';5wogz@kdjtor	';5ươgkdjtor
+0 0 0 1 0 0 1 1 0|7Sy/9syo5.uoOWj 8]w1a	7Sy/9syo5.uợ 8w1a
+0 1 0 0 0 1 0 1 0|@o ooj3DFtxUfjOzw'nxq@y/	o ộ3DFtxUƠ'nxy/
+0 1 1 0 0 1 0 0 0|twU[Ukrrr,0iathy4u0h 405t	tưƯơUkrrr,0iathy4u0h 405t
+0 0 0 0 1 0 1 0 0|ryAUu2[U,52usowdWd7dr 	ryAUu2[U,52uớdWd7dr 
+0 0 0 1 0 0 0 0 0|khoacws, oanwr tuf tif, huow tay, thuowr ayas,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 0 0 1 0 0 0 0 0|khoawcs, oawnr tuf tif, huow tay, thuowr aays,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 0 1 1 0 0 0 0 0|khoacws, oanwr tuf tif, huow tay, thuowr ayas,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 0 1 1 0 0 0 0 0|khoawcs, oawnr tuf tif, huow tay, thuowr aays,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 1 0 1 0 0 0 0 0|khoacws, oanwr tuf tif, huow tay, thuowr ayas,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 1 0 1 0 0 0 0 0|khoawcs, oawnr tuf tif, huow tay, thuowr aays,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 1 1 1 0 0 0 0 0|khoacws, oanwr tuf tif, huow tay, thuowr ayas,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+0 1 1 1 0 0 0 0 0|khoawcs, oawnr tuf tif, huow tay, thuowr aays,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 0 0 1 0 0 0 0 0|khoac81, oan83 tu2 ti2, huo7 tay, thuo73 ay61,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 0 0 1 0 0 0 0 0|khoa8c1, oa8n3 tu2 ti2, huo7 tay, thuo73 a6y1,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 0 1 1 0 0 0 0 0|khoac81, oan83 tu2 ti2, huo7 tay, thuo73 ay61,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 0 1 1 0 0 0 0 0|khoa8c1, oa8n3 tu2 ti2, huo7 tay, thuo73 a6y1,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 1 0 1 0 0 0 0 0|khoac81, oan83 tu2 ti2, huo7 tay, thuo73 ay61,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 1 0 1 0 0 0 0 0|khoa8c1, oa8n3 tu2 ti2, huo7 tay, thuo73 a6y1,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 1 1 1 0 0 0 0 0|khoac81, oan83 tu2 ti2, huo7 tay, thuo73 ay61,	khoắc, oẳn tù tì, huơ tay, thuở ấy,
+1 1 1 1 0 0 0 0 0|khoa8c1, oa8n3 tu2 ti2, huo7 tay, thuo73 a6y1,	khoắc, oẳn tù tì, huơ tay, thuở ấy,

@@ -103,3 +103,26 @@ fn test_engine_typing_macro_expansion() {
     let res4 = engine.type_string("dc ");
     assert_eq!(res4, "được ");
 }
+
+#[test]
+fn test_macro_erases_shown_letters_not_typed_keys() {
+    // "aa" is typed with 2 keys but shows as the single letter "â": expanding it must
+    // erase 1 character, not eat the space before it
+    let mut engine = VietnameseEngine::new();
+    engine.use_macro = true;
+    engine.macro_table.lock().unwrap().add("aa", "AA-macro");
+    assert_eq!(engine.type_string("x aa "), "x AA-macro ");
+}
+
+#[test]
+fn test_macro_keeps_non_vietnamese_unicode() {
+    let mut engine = VietnameseEngine::new();
+    engine.use_macro = true;
+    engine.macro_table.lock().unwrap().add("tm", "™ → “ok” 😀");
+    assert_eq!(engine.type_string("tm "), "™ → “ok” 😀 ");
+
+    // A code point above U+FFFF must not be truncated into a Vietnamese letter (U+11EA1 -> U+1EA1 "ạ")
+    let codes = string_to_macro_key_codes("\u{11EA1}", 0);
+    assert_eq!(codes.len(), 1);
+    assert_eq!(minkey::tables::pure_character(codes[0]), Some('\u{11EA1}'));
+}

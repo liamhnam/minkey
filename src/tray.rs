@@ -518,7 +518,7 @@ unsafe fn check_menu_item(hmenu: HMENU, id: u32, checked: bool) {
 
 // Generate modern V / E icon dynamically in memory using GDI
 #[cfg(windows)]
-unsafe fn create_tray_icon(is_vietnamese: bool, is_gray: bool) -> HICON {
+pub unsafe fn create_tray_icon(is_vietnamese: bool, is_gray: bool) -> HICON {
     unsafe {
         let size: i32 = 32;
         let hdc_screen = GetDC(std::ptr::null_mut());

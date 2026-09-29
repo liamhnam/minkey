@@ -247,9 +247,9 @@ pub fn string_to_macro_key_codes(s: &str, code_table: usize) -> Vec<u32> {
             continue;
         }
 
-        // Vietnamese vowel with diacritics
+        // Vietnamese vowel with diacritics (all in the BMP; a wider code point must not be truncated into one)
         let mut found = false;
-        for (&root_key, v0) in t0.iter() {
+        for (&root_key, v0) in t0.iter().filter(|_| code <= 0xFFFF) {
             for (k, &char_code) in v0.iter().enumerate() {
                 if char_code == (code as u16) {
                     if let Some(target_v) = target_table.get(&root_key) {

@@ -92,9 +92,6 @@ fn simulate(eng: &mut VietnameseEngine, cfg: &str, text: &str) -> String {
 const INTENTIONAL_DIFFS: &[(&str, &str)] = &[
     ("3 0 0 0 1 0 0 1 0|hqu7@nsa.4sjd.i/iEq", "hqúna.4sjd.i/iEq"),
     ("2 0 0 0 1 1 0 1 0|esO?qunFUl@.sm[cfy", "éO?qùnU.sm[cfy"),
-    ("0 1 1 1 1 0 1 0 0|hongws ghuaycha nghoiyo THUOUNGww", "hongws ghuaycha nghoiyo THUƠUNG"),
-    ("1 1 0 0 1 0 0 0 0|ep63 pot3 THUO77 baung3 Ngoi64 Cheng63", "ểp pot3 THUƠ bảung Ngỗi Chểng"),
-    ("2 1 0 0 1 0 1 0 0|moaux anf Thuouiwwx hiys gioim", "moaũ àn Thuỡui híy gioim"),
     ("2 1 1 0 1 0 0 0 0|Sopjo ghyeuce Thuowf soow poayi", "Sộp ghyeuce Thuờ sơ poayi"),
 ];
 
@@ -109,6 +106,12 @@ fn matches_allowing_openkey_nul(expected: &str, got: &str) -> bool {
 #[test]
 fn matches_openkey_engine() {
     let data = include_str!("parity/openkey_parity.tsv");
+    // Larger groups of reviewed differences, one row per case (reasons in the file header)
+    let reviewed: std::collections::HashMap<&str, &str> = include_str!("parity/minkey_intentional_diffs.tsv")
+        .lines()
+        .filter(|l| !l.starts_with('#'))
+        .filter_map(|l| l.split_once('\t'))
+        .collect();
     let mut eng = VietnameseEngine::new();
     eng.use_macro = false;
 
@@ -122,6 +125,7 @@ fn matches_openkey_engine() {
 
         let ok = match INTENTIONAL_DIFFS.iter().find(|(i, _)| *i == input) {
             Some((_, minkey)) => got == *minkey,
+            None if reviewed.contains_key(input) => got == reviewed[input],
             None if openkey.contains('\0') => matches_allowing_openkey_nul(openkey, &got),
             None => got == openkey,
         };

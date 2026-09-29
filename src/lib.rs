@@ -1,3 +1,4 @@
+pub mod app;
 pub mod config;
 pub mod convert;
 pub mod dialog;
@@ -10,11 +11,13 @@ pub mod macos_app;
 pub mod macro_engine;
 pub mod smart_switch;
 pub mod tables;
+pub mod settings;
 pub mod tray;
 #[cfg(target_os = "macos")]
 pub mod tray_macos;
 pub mod types;
-pub mod ui;
+#[cfg(windows)]
+pub mod win32_ui;
 
 /// CFBundleIdentifier of the macOS app bundle (see bundle_macos.sh)
 pub const MINKEY_BUNDLE_ID: &str = "org.minkey.Minkey";

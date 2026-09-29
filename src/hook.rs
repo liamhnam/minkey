@@ -325,6 +325,7 @@ unsafe extern "system" fn keyboard_hook_proc(n_code: i32, w_param: WPARAM, l_par
     let is_key_down = w_param == WM_KEYDOWN as usize || w_param == WM_SYSKEYDOWN as usize;
     let is_key_up = w_param == WM_KEYUP as usize || w_param == WM_SYSKEYUP as usize;
 
+    sync_modifier_mask(hook_ctx, vk);
     if is_key_down {
         set_modifier_mask(hook_ctx, vk);
     } else if is_key_up {
@@ -517,10 +518,18 @@ unsafe extern "system" fn keyboard_hook_proc(n_code: i32, w_param: WPARAM, l_par
                 }
                 for _ in 0..bpc {
                     unsafe { send_backspace() };
+                    if is_double_code(code_table) && !hook_ctx.sync_key.is_empty() {
+                        if hook_ctx.sync_key.pop().unwrap_or(1) > 1 {
+                            unsafe { send_backspace() };
+                        }
+                    }
                 }
                 for &m_code in state.macro_data.iter() {
                     unsafe { send_key_code(m_code, code_table, &mut hook_ctx.sync_key) };
                 }
+                // The space / punctuation / Enter that triggered the macro was consumed: type it after the text
+                let k = hook_ctx.keycode as u32 | if is_shift { CAPS_MASK } else { 0 };
+                unsafe { send_key_code(k, code_table, &mut hook_ctx.sync_key) };
                 return 1; // Consume key event
             }
             HookCodeState::BreakWord => {
@@ -666,6 +675,32 @@ fn set_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     }
 }
 
+/// Re-reads Shift / Ctrl / Alt / Win from the keyboard state instead of trusting the key-ups seen so
+/// far: a key-up can be swallowed (Ctrl+Alt+Del hands it to the secure desktop), which left the
+/// modifier "down" forever — no Vietnamese while Ctrl/Alt/Win looked held, upper-case output while
+/// Shift did. The key of the event being processed is skipped: a low-level hook runs before the
+/// system updates that key's state; set/unset_modifier_mask handle it.
+#[cfg(windows)]
+fn sync_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
+    const MODIFIERS: [(u16, u16, u16); 4] = [
+        (VK_LSHIFT, VK_RSHIFT, MASK_SHIFT),
+        (VK_LCONTROL, VK_RCONTROL, MASK_CONTROL),
+        (VK_LMENU, VK_RMENU, MASK_ALT),
+        (VK_LWIN, VK_RWIN, MASK_WIN),
+    ];
+    let is_down = |key: u16| unsafe { GetAsyncKeyState(key as i32) } < 0;
+    for (left, right, mask) in MODIFIERS {
+        if vk == left || vk == right {
+            continue;
+        }
+        if is_down(left) || is_down(right) {
+            ctx.flag |= mask;
+        } else {
+            ctx.flag &= !mask;
+        }
+    }
+}
+
 #[cfg(windows)]
 fn unset_modifier_mask(ctx: &mut HookStateContext, vk: u16) {
     match vk {
@@ -804,6 +839,18 @@ unsafe fn send_unicode_char(ch: u16) {
 
 #[cfg(windows)]
 unsafe fn send_key_code(data: u32, code_table: usize, sync_key: &mut Vec<u8>) {
+    // Macro text outside the key map / Vietnamese tables (™, →, “ ”, emoji...): it is a code point,
+    // not a virtual key, so sending it as wVk would press an unrelated key
+    if let Some(ch) = pure_character(data) {
+        if is_double_code(code_table) {
+            sync_key.push(1);
+        }
+        let mut buf = [0u16; 2];
+        for &unit in ch.encode_utf16(&mut buf).iter() {
+            unsafe { send_unicode_char(unit) };
+        }
+        return;
+    }
     if (data & CHAR_CODE_MASK) == 0 {
         if is_double_code(code_table) {
             sync_key.push(1);

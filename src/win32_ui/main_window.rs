@@ -184,18 +184,14 @@ fn build(hwnd: HWND) {
 
     // ---- Page 4: Thông tin
     f.page = 4;
-    f.text("Minkey ⚡", (36, 70, 400, 44), FontKind::Title);
-    f.text(&format!("Bộ gõ tiếng Việt mã nguồn mở · Phiên bản {}", env!("CARGO_PKG_VERSION")), (38, 118, 480, 22), FontKind::Bold);
+    f.text("Minkey", (36, 80, 300, 42), FontKind::Title);
+    f.text(&format!("Phiên bản {}", env!("CARGO_PKG_VERSION")), (38, 126, 480, 20), FontKind::Bold);
     f.label(
-        "Siêu nhẹ · Siêu nhanh · An toàn bộ nhớ tuyệt đối",
-        (38, 144, 480, 20),
+        "Tác giả:       Hồ Hoàng Nam\nGiấy phép:   GNU General Public License v3.0\nNền tảng:     Windows 10 / 11  ·  Rust 2024 Edition",
+        (38, 164, 480, 60),
     );
-    f.label(
-        "Tác giả:      Hồ Hoàng Nam\nGiấy phép:  GNU General Public License v3.0\nNền tảng:    Windows 10 / 11  ·  Rust 2024 Edition",
-        (38, 182, 480, 60),
-    );
-    f.button(ID_GITHUB, "GitHub", (38, 272, 110, 30), false);
-    f.button(ID_CHECK_UPDATE, "Kiểm tra cập nhật", (158, 272, 150, 30), false);
+    f.button(ID_GITHUB, "GitHub", (38, 268, 110, 30), false);
+    f.button(ID_CHECK_UPDATE, "Kiểm tra cập nhật", (158, 268, 150, 30), false);
 
     // Option check boxes, created after their group boxes so they are drawn on top
     for (i, (_, label, page, x, y)) in OPTIONS.iter().enumerate() {

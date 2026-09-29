@@ -184,18 +184,18 @@ fn build(hwnd: HWND) {
 
     // ---- Page 4: Thông tin
     f.page = 4;
-    f.text("Minkey", (36, 84, 300, 40), FontKind::Title);
-    f.text(&format!("Bộ gõ tiếng Việt nguồn mở · phiên bản {}", env!("CARGO_PKG_VERSION")), (38, 128, 480, 20), FontKind::Bold);
+    f.text("Minkey ⚡", (36, 70, 400, 44), FontKind::Title);
+    f.text(&format!("Bộ gõ tiếng Việt mã nguồn mở · Phiên bản {}", env!("CARGO_PKG_VERSION")), (38, 118, 480, 22), FontKind::Bold);
     f.label(
-        "Bản làm lại hoàn toàn bằng Rust của bộ gõ OpenKey.\nGiữ nguyên 100% tính năng · Tốc độ tối đa · RAM cực thấp.",
-        (38, 156, 480, 40),
+        "Siêu nhẹ · Siêu nhanh · An toàn bộ nhớ tuyệt đối",
+        (38, 144, 480, 20),
     );
     f.label(
-        "Tác giả gốc OpenKey: Mai Vũ Tuyên\nRust Port & UI: Liam & Antigravity\nGiấy phép: GNU GPL v3.0",
-        (38, 204, 480, 60),
+        "Tác giả:      Hồ Hoàng Nam\nGiấy phép:  GNU General Public License v3.0\nNền tảng:    Windows 10 / 11  ·  Rust 2024 Edition",
+        (38, 182, 480, 60),
     );
-    f.button(ID_GITHUB, "GitHub", (38, 280, 110, 30), false);
-    f.button(ID_CHECK_UPDATE, "Kiểm tra cập nhật", (158, 280, 150, 30), false);
+    f.button(ID_GITHUB, "GitHub", (38, 272, 110, 30), false);
+    f.button(ID_CHECK_UPDATE, "Kiểm tra cập nhật", (158, 272, 150, 30), false);
 
     // Option check boxes, created after their group boxes so they are drawn on top
     for (i, (_, label, page, x, y)) in OPTIONS.iter().enumerate() {
@@ -274,7 +274,7 @@ fn on_command(hwnd: HWND, id: i32, code: u32) {
         }
         (ID_OPEN_MACRO, BN_CLICKED) => super::macro_window::show(),
         (ID_OPEN_CONVERT, BN_CLICKED) => super::convert_window::show(),
-        (ID_GITHUB, BN_CLICKED) => crate::dialog::open_url("https://github.com/tuyenvm/OpenKey"),
+        (ID_GITHUB, BN_CLICKED) => crate::dialog::open_url("https://github.com/liamhnam/minkey"),
         (ID_CHECK_UPDATE, BN_CLICKED) => {
             controls::message_box(
                 hwnd,

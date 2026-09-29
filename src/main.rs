@@ -1,4 +1,4 @@
-// Minkey - Vietnamese input method for Windows (Rust port of OpenKey)
+// Minkey - Vietnamese input method for Windows
 
 #![windows_subsystem = "windows"]
 
